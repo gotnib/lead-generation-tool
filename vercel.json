@@ -1,0 +1,5 @@
+{
+  "framework": "nextjs",
+  "installCommand": "PUPPETEER_SKIP_DOWNLOAD=true npm install",
+  "buildCommand": "npm run build"
+}
