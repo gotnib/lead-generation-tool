@@ -11,13 +11,13 @@ export async function scrapeGoogleMaps(
   let launchArgs: string[];
 
   if (process.env.NODE_ENV === 'production') {
-    // @sparticuz/chromium-min downloads Chromium from GitHub into /tmp at runtime.
-    // The binary is cached for the lifetime of the warm Lambda instance.
+    // @sparticuz/chromium bundles libnss3 and all other required shared libraries
+    // alongside the binary and sets LD_LIBRARY_PATH automatically via executablePath().
+    // The -min variant only downloads the bare binary and expects system libs to exist
+    // (they don't in Lambda's minimal environment), causing the libnss3.so crash.
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const chromium = require('@sparticuz/chromium-min');
-    const CHROMIUM_URL =
-      'https://github.com/Sparticuz/chromium/releases/download/v131.0.0/chromium-v131.0.0-pack.tar';
-    executablePath = await chromium.executablePath(CHROMIUM_URL);
+    const chromium = require('@sparticuz/chromium');
+    executablePath = await chromium.executablePath();
     launchArgs = [...chromium.args, '--disable-gpu', '--single-process'];
   } else {
     executablePath = process.env.CHROME_EXECUTABLE_PATH || undefined;
