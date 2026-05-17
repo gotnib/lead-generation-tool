@@ -23,10 +23,23 @@ function stripHtml(html: string): string {
     .trim();
 }
 
+function guessDomains(businessName: string): string[] {
+  const slug = businessName
+    .toLowerCase()
+    .replace(/[''']/g, '')
+    .replace(/\b(llc|inc|co|corp|company|services|shop|the|and|&)\b/g, '')
+    .replace(/[^a-z0-9]+/g, '')
+    .trim();
+
+  return slug
+    ? [`https://${slug}.com`, `https://www.${slug}.com`]
+    : [];
+}
+
 async function fetchPage(url: string): Promise<string> {
   const res = await fetch(url, {
     headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LeadBot/1.0)' },
-    signal: AbortSignal.timeout(6000),
+    signal: AbortSignal.timeout(5000),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.text();
@@ -51,18 +64,18 @@ async function scrapeWebsite(rawUrl: string): Promise<{ text: string; emails: st
   for (const url of pagesToTry) {
     try {
       const html = await fetchPage(url);
-      const emails = html.match(EMAIL_RE) ?? [];
-      emails.forEach((e) => emailSet.add(e.toLowerCase()));
-      textParts.push(stripHtml(html).slice(0, 4000));
+      (html.match(EMAIL_RE) ?? []).forEach((e) => emailSet.add(e.toLowerCase()));
+      textParts.push(stripHtml(html).slice(0, 3000));
     } catch {
       // page not found or timed out — continue
     }
-    if (emailSet.size > 0 && textParts.length >= 2) break; // enough data
   }
 
   return {
     text: textParts.join('\n---\n').slice(0, 12000),
-    emails: Array.from(emailSet).filter((e) => !e.includes('example.com')),
+    emails: Array.from(emailSet).filter(
+      (e) => !e.includes('example.com') && !e.includes('sentry.io') && !e.includes('w3.org')
+    ),
   };
 }
 
@@ -70,16 +83,34 @@ export async function findContact(lead: LeadInfo): Promise<ContactResult> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
 
-  let context = 'No website available for this business.';
+  let context = '';
+  const urlsToTry: string[] = [];
 
   if (lead.website) {
+    urlsToTry.push(lead.website);
+  } else {
+    urlsToTry.push(...guessDomains(lead.businessName));
+  }
+
+  for (const url of urlsToTry) {
     try {
-      const { text, emails } = await scrapeWebsite(lead.website);
-      const emailList = emails.length > 0 ? `Emails found on site: ${emails.join(', ')}` : 'No email addresses found on site.';
-      context = `Website content (excerpts):\n${text}\n\n${emailList}`;
+      const { text, emails } = await scrapeWebsite(url);
+      if (text.length > 50 || emails.length > 0) {
+        const emailList = emails.length > 0
+          ? `Emails found: ${emails.join(', ')}`
+          : 'No email addresses found on site.';
+        context = `Website: ${url}\n\n${text}\n\n${emailList}`;
+        break;
+      }
     } catch {
-      context = `Website (${lead.website}) could not be fetched.`;
+      // try next
     }
+  }
+
+  if (!context) {
+    context = lead.website
+      ? `Website (${lead.website}) could not be fetched.`
+      : 'No website available. No domain could be found.';
   }
 
   const client = new Anthropic({ apiKey });
@@ -90,18 +121,20 @@ export async function findContact(lead: LeadInfo): Promise<ContactResult> {
     messages: [
       {
         role: 'user',
-        content: `Find the best decision-maker to contact at "${lead.businessName}", a ${lead.category} business in ${lead.city}.
+        content: `Find the best person to contact at "${lead.businessName}", a ${lead.category} business in ${lead.city}.
 
 ${context}
 
-Identify:
-1. The decision-maker's full name (owner, general manager, or whoever handles marketing/web decisions for a small business). Use the name from the website if you can find it.
-2. Their email address. Prefer a personal email (firstname@domain.com) over generic ones (info@, contact@). If only generic emails are available, use the best one.
+Return the decision-maker's name and email. For a small local business the owner or manager is usually the right contact.
 
-Return JSON only — no explanation, no markdown:
-{"contactName": "Jane Smith", "contactEmail": "jane@example.com"}
+Rules:
+- Prefer a direct personal email (john@domain.com) over generic ones (info@, contact@)
+- If you found emails on the site, use the most relevant one
+- If no email was found but you can see a domain, suggest info@thatdomain.com as a best guess
+- Set null only if you have absolutely no basis for a guess
 
-Use null for any field you cannot determine with reasonable confidence.`,
+Return JSON only:
+{"contactName": "John Smith", "contactEmail": "john@example.com"}`,
       },
     ],
   });

@@ -29,31 +29,24 @@ function formatDate(iso: string) {
 
 export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: Props) {
   const [form, setForm] = useState<FormState>({
-    status: 'new',
-    phone: '',
-    website: '',
-    address: '',
-    notes: '',
-    contactName: '',
-    contactEmail: '',
+    status: 'new', phone: '', website: '', address: '', notes: '',
+    contactName: '', contactEmail: '',
   });
   const [pitchEmail, setPitchEmail] = useState('');
+  const [emailBody, setEmailBody] = useState('');
+  const [emailSubject, setEmailSubject] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isFindingContact, setIsFindingContact] = useState(false);
   const [contactError, setContactError] = useState('');
-  const [contactEmailCopied, setContactEmailCopied] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [pitchError, setPitchError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
-
-  const [emails, setEmails] = useState<EmailMessage[]>([]);
-  const [isLoadingEmails, setIsLoadingEmails] = useState(false);
-  const [emailSubject, setEmailSubject] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState('');
   const [sendSuccess, setSendSuccess] = useState(false);
+  const [emails, setEmails] = useState<EmailMessage[]>([]);
+  const [isLoadingEmails, setIsLoadingEmails] = useState(false);
 
   useEffect(() => {
     if (lead) {
@@ -66,7 +59,17 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
         contactName: lead.contactName ?? '',
         contactEmail: lead.contactEmail ?? '',
       });
-      setPitchEmail(lead.pitchEmail ?? '');
+      const pitch = lead.pitchEmail ?? '';
+      setPitchEmail(pitch);
+      // Pre-fill compose area from saved pitch email
+      if (pitch) {
+        const subjectMatch = pitch.match(/^Subject:\s*(.+?)$/m);
+        setEmailSubject(subjectMatch ? subjectMatch[1].trim() : '');
+        setEmailBody(pitch.replace(/^Subject:[^\n]*\n\n?/, '').trim());
+      } else {
+        setEmailSubject('');
+        setEmailBody('');
+      }
       setPitchError('');
       setContactError('');
       setSaveSuccess(false);
@@ -75,7 +78,6 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
     }
   }, [lead]);
 
-  // Load email thread when lead changes
   useEffect(() => {
     if (!lead) return;
     setIsLoadingEmails(true);
@@ -145,13 +147,6 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
     }
   };
 
-  const handleCopyContactEmail = async () => {
-    if (!form.contactEmail) return;
-    await navigator.clipboard.writeText(form.contactEmail);
-    setContactEmailCopied(true);
-    setTimeout(() => setContactEmailCopied(false), 2000);
-  };
-
   const handleGeneratePitch = async () => {
     setIsGenerating(true);
     setPitchError('');
@@ -159,10 +154,11 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       const res = await fetch(`/api/leads/${lead.id}/pitch`, { method: 'POST' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Generation failed');
-      setPitchEmail(data.pitchEmail);
-      // Pre-fill subject from generated email's Subject: line
-      const match = data.pitchEmail.match(/^Subject:\s*(.+?)$/m);
-      if (match) setEmailSubject(match[1].trim());
+      const pitch: string = data.pitchEmail;
+      setPitchEmail(pitch);
+      const subjectMatch = pitch.match(/^Subject:\s*(.+?)$/m);
+      if (subjectMatch) setEmailSubject(subjectMatch[1].trim());
+      setEmailBody(pitch.replace(/^Subject:[^\n]*\n\n?/, '').trim());
     } catch (err: unknown) {
       setPitchError(err instanceof Error ? err.message : 'Failed to generate email');
     } finally {
@@ -170,22 +166,13 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
     }
   };
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(pitchEmail);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const handleSendEmail = async () => {
-    if (!form.contactEmail) return;
     setSendError('');
     setSendSuccess(false);
     setIsSending(true);
-
-    // Strip the "Subject: …\n\n" header from the pitch body before sending
-    const body = pitchEmail.replace(/^Subject:[^\n]*\n\n?/, '').trim();
     const subject = emailSubject.trim() || `Quick note — ${lead.businessName}`;
-
+    const body = emailBody.trim();
+    if (!body) { setSendError('Write a message first'); setIsSending(false); return; }
     try {
       const res = await fetch(`/api/leads/${lead.id}/send-email`, {
         method: 'POST',
@@ -206,90 +193,54 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
 
   return (
     <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
 
-      {/* Panel */}
-      <aside
-        className="fixed inset-y-0 right-0 z-50 flex w-full max-w-lg flex-col border-l border-zinc-800 bg-zinc-900 shadow-2xl"
-        role="dialog"
-        aria-label="Lead detail"
-      >
+      <aside className="fixed inset-y-0 right-0 z-50 flex w-full max-w-lg flex-col border-l border-zinc-800 bg-zinc-900 shadow-2xl" role="dialog" aria-label="Lead detail">
+
         {/* Header */}
         <div className="flex items-start justify-between border-b border-zinc-800 px-6 py-5">
           <div className="min-w-0 pr-4">
-            <h2 className="truncate text-base font-semibold text-zinc-100">
-              {lead.businessName}
-            </h2>
-            <p className="mt-0.5 text-sm text-zinc-500">
-              {lead.category} · {lead.city}
-            </p>
+            <h2 className="truncate text-base font-semibold text-zinc-100">{lead.businessName}</h2>
+            <p className="mt-0.5 text-sm text-zinc-500">{lead.category} · {lead.city}</p>
             {lead.rating && (
               <p className="mt-1 flex items-center gap-1 text-xs text-amber-400">
                 <svg width="11" height="11" viewBox="0 0 10 10" fill="currentColor">
                   <path d="M5 0l1.12 3.44H9.5L6.69 5.56l1.07 3.44L5 7.06l-2.76 1.94 1.07-3.44L.5 3.44H3.88L5 0z" />
                 </svg>
                 {lead.rating.toFixed(1)}
-                {lead.reviewCount != null && (
-                  <span className="text-zinc-500">({lead.reviewCount} reviews)</span>
-                )}
+                {lead.reviewCount != null && <span className="text-zinc-500">({lead.reviewCount} reviews)</span>}
               </p>
             )}
           </div>
-          <button
-            onClick={onClose}
-            className="flex-shrink-0 rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-            aria-label="Close panel"
-          >
+          <button onClick={onClose} className="flex-shrink-0 rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100 focus:outline-none" aria-label="Close panel">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <path d="M2 2l12 12M14 2L2 14" />
             </svg>
           </button>
         </div>
 
-        {/* Scrollable body */}
+        {/* Body */}
         <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5">
 
           {/* Status */}
           <div>
-            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-zinc-500">
-              Pipeline Status
-            </label>
-            <select
-              value={form.status}
-              onChange={set('status')}
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-            >
-              {PIPELINE_STAGES.map((s) => (
-                <option key={s.id} value={s.id}>{s.label}</option>
-              ))}
+            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-zinc-500">Pipeline Status</label>
+            <select value={form.status} onChange={set('status')} className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+              {PIPELINE_STAGES.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
             </select>
           </div>
 
-          {/* Contact fields */}
+          {/* Business contact fields */}
           <div className="grid grid-cols-2 gap-4">
-            {(
-              [
-                { key: 'phone',   label: 'Phone',   placeholder: '+1 (555) 000-0000', span: 1 },
-                { key: 'website', label: 'Website', placeholder: 'example.com',       span: 1 },
-                { key: 'address', label: 'Address', placeholder: '123 Main St…',      span: 2 },
-              ] as const
-            ).map(({ key, label, placeholder, span }) => (
+            {([
+              { key: 'phone',   label: 'Phone',   placeholder: '+1 (555) 000-0000', span: 1 },
+              { key: 'website', label: 'Website', placeholder: 'example.com',       span: 1 },
+              { key: 'address', label: 'Address', placeholder: '123 Main St…',      span: 2 },
+            ] as const).map(({ key, label, placeholder, span }) => (
               <div key={key} className={span === 2 ? 'col-span-2' : ''}>
-                <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-zinc-500">
-                  {label}
-                </label>
-                <input
-                  type="text"
-                  value={form[key as keyof FormState]}
-                  onChange={set(key as keyof FormState)}
-                  placeholder={placeholder}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-                />
+                <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-zinc-500">{label}</label>
+                <input type="text" value={form[key as keyof FormState]} onChange={set(key as keyof FormState)} placeholder={placeholder}
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
               </div>
             ))}
           </div>
@@ -297,226 +248,106 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
           {/* Contact person */}
           <div>
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">
-                Contact Person
-              </span>
-              <button
-                onClick={handleFindContact}
-                disabled={isFindingContact}
-                className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-violet-400 transition hover:bg-violet-500/10 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-violet-500/30"
-              >
+              <span className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Contact Person</span>
+              <button onClick={handleFindContact} disabled={isFindingContact}
+                className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-violet-400 transition hover:bg-violet-500/10 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none">
                 {isFindingContact ? (
-                  <>
-                    <span className="h-3 w-3 animate-spin rounded-full border-2 border-violet-500/30 border-t-violet-400" />
-                    Searching…
-                  </>
+                  <><span className="h-3 w-3 animate-spin rounded-full border-2 border-violet-500/30 border-t-violet-400" />Searching…</>
                 ) : (
-                  <>
-                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                      <path d="M7 1l1.5 4H13L9.5 7.5l1.5 4L7 9.5 3 11.5l1.5-4L1 5h4.5L7 1z" fill="currentColor" />
-                    </svg>
-                    Find with AI
-                  </>
+                  <><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4H13L9.5 7.5l1.5 4L7 9.5 3 11.5l1.5-4L1 5h4.5L7 1z" fill="currentColor" /></svg>Find with AI</>
                 )}
               </button>
             </div>
-
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-zinc-500">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  value={form.contactName}
-                  onChange={set('contactName')}
-                  placeholder="Owner / Manager"
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-                />
+                <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-zinc-500">Name</label>
+                <input type="text" value={form.contactName} onChange={set('contactName')} placeholder="Owner / Manager"
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
               </div>
               <div>
-                <label className="mb-1.5 flex items-center justify-between text-[11px] font-medium uppercase tracking-wider text-zinc-500">
-                  Email
-                  {form.contactEmail && (
-                    <button
-                      onClick={handleCopyContactEmail}
-                      className="normal-case tracking-normal text-blue-400 transition-colors hover:text-blue-300"
-                    >
-                      {contactEmailCopied ? 'Copied!' : 'Copy'}
-                    </button>
-                  )}
-                </label>
-                <input
-                  type="text"
-                  value={form.contactEmail}
-                  onChange={set('contactEmail')}
-                  placeholder="email@business.com"
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-                />
+                <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-zinc-500">Email</label>
+                <input type="text" value={form.contactEmail} onChange={set('contactEmail')} placeholder="email@business.com"
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
               </div>
             </div>
-
-            {contactError && (
-              <p className="mt-2 text-xs text-red-400">{contactError}</p>
-            )}
+            {contactError && <p className="mt-2 text-xs text-red-400">{contactError}</p>}
           </div>
 
           {/* Notes */}
           <div>
-            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-zinc-500">
-              Notes
-            </label>
-            <textarea
-              value={form.notes}
-              onChange={set('notes')}
-              rows={3}
-              placeholder="Call notes, follow-up reminders, context…"
-              className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-            />
+            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-zinc-500">Notes</label>
+            <textarea value={form.notes} onChange={set('notes')} rows={3} placeholder="Call notes, follow-up reminders, context…"
+              className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
           </div>
 
-          {/* Pitch email section */}
+          {/* Compose + Send */}
           <div>
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">
-                Cold Pitch Email
-              </span>
-              {pitchEmail && (
-                <button
-                  onClick={handleCopy}
-                  className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-blue-400 transition hover:bg-blue-500/10 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-                >
-                  {copied ? (
-                    <>
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M2 6l3 3 5-5" />
-                      </svg>
-                      Copied
-                    </>
-                  ) : (
-                    <>
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <rect x="4" y="4" width="7" height="7" rx="1.5" />
-                        <path d="M8 4V2.5A1.5 1.5 0 006.5 1H2.5A1.5 1.5 0 001 2.5v4A1.5 1.5 0 002.5 8H4" />
-                      </svg>
-                      Copy
-                    </>
-                  )}
-                </button>
-              )}
+              <span className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Compose Email</span>
+              <button onClick={handleGeneratePitch} disabled={isGenerating}
+                className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-blue-400 transition hover:bg-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none">
+                {isGenerating ? (
+                  <><span className="h-3 w-3 animate-spin rounded-full border-2 border-blue-500/30 border-t-blue-400" />Generating…</>
+                ) : (
+                  <><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4H13L9.5 7.5l1.5 4L7 9.5 3 11.5l1.5-4L1 5h4.5L7 1z" fill="currentColor" /></svg>AI Draft</>
+                )}
+              </button>
             </div>
 
-            <button
-              onClick={handleGeneratePitch}
-              disabled={isGenerating}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:from-blue-600 hover:to-indigo-600 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-            >
-              {isGenerating ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  Generating email…
-                </>
-              ) : (
-                <>
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path d="M7 1l1.5 4H13L9.5 7.5l1.5 4L7 9.5 3 11.5l1.5-4L1 5h4.5L7 1z" fill="white" />
-                  </svg>
-                  Generate Pitch Email
-                </>
-              )}
-            </button>
+            {pitchError && <p className="mb-2 text-xs text-red-400">{pitchError}</p>}
 
-            {pitchError && (
-              <p className="mt-2 text-xs text-red-400">{pitchError}</p>
+            <input type="text" value={emailSubject} onChange={(e) => setEmailSubject(e.target.value)}
+              placeholder="Subject line"
+              className="mb-2 w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+
+            <textarea value={emailBody} onChange={(e) => setEmailBody(e.target.value)} rows={9}
+              placeholder={`Write your email to ${form.contactName || 'the contact'}…`}
+              className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+
+            {form.contactEmail ? (
+              <button onClick={handleSendEmail} disabled={isSending}
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+                {isSending ? (
+                  <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />Sending…</>
+                ) : (
+                  <><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2L2 7l5 2.5L9.5 14 14 2z" /></svg>Send to {form.contactEmail}</>
+                )}
+              </button>
+            ) : (
+              <p className="mt-2 text-center text-xs text-zinc-600">Add a contact email above to send</p>
             )}
 
-            {pitchEmail && (
-              <textarea
-                readOnly
-                value={pitchEmail}
-                rows={10}
-                className="mt-3 w-full resize-none rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2.5 font-mono text-xs text-zinc-300 focus:outline-none"
-              />
-            )}
-
-            {/* Send controls — only shown when there's a pitch email and a contact email */}
-            {pitchEmail && form.contactEmail && (
-              <div className="mt-3 space-y-2">
-                <input
-                  type="text"
-                  value={emailSubject}
-                  onChange={(e) => setEmailSubject(e.target.value)}
-                  placeholder="Subject line"
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-                />
-                <button
-                  onClick={handleSendEmail}
-                  disabled={isSending}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
-                >
-                  {isSending ? (
-                    <>
-                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                      Sending…
-                    </>
-                  ) : (
-                    <>
-                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M14 2L2 7l5 2.5L9.5 14 14 2z" />
-                      </svg>
-                      Send to {form.contactEmail}
-                    </>
-                  )}
-                </button>
-                {sendError && <p className="text-xs text-red-400">{sendError}</p>}
-                {sendSuccess && <p className="text-xs text-emerald-400">Email sent.</p>}
-              </div>
-            )}
+            {sendError && <p className="mt-2 text-xs text-red-400">{sendError}</p>}
+            {sendSuccess && <p className="mt-2 text-xs text-emerald-400">Email sent.</p>}
           </div>
 
-          {/* Email thread */}
+          {/* Correspondence thread */}
           <div>
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">
-                Correspondence
-              </span>
+              <span className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Correspondence</span>
               {emails.length > 0 && (
-                <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] text-zinc-400">
-                  {emails.length}
-                </span>
+                <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] text-zinc-400">{emails.length}</span>
               )}
             </div>
 
             {isLoadingEmails ? (
               <div className="flex items-center gap-2 py-4 text-xs text-zinc-600">
-                <span className="h-3 w-3 animate-spin rounded-full border-2 border-zinc-700 border-t-zinc-500" />
-                Loading…
+                <span className="h-3 w-3 animate-spin rounded-full border-2 border-zinc-700 border-t-zinc-500" />Loading…
               </div>
             ) : emails.length === 0 ? (
-              <p className="py-4 text-center text-xs text-zinc-600">No emails yet</p>
+              <p className="py-4 text-center text-xs text-zinc-600">No emails sent or received yet</p>
             ) : (
               <div className="space-y-2">
                 {emails.map((email) => (
-                  <div
-                    key={email.id}
-                    className={`rounded-lg border p-3 ${
-                      email.direction === 'sent'
-                        ? 'border-blue-500/20 bg-blue-500/5'
-                        : 'border-zinc-700 bg-zinc-800/50'
-                    }`}
-                  >
+                  <div key={email.id} className={`rounded-lg border p-3 ${email.direction === 'sent' ? 'border-blue-500/20 bg-blue-500/5' : 'border-zinc-700 bg-zinc-800/50'}`}>
                     <div className="mb-1 flex items-center justify-between gap-2">
-                      <span className={`text-[10px] font-medium uppercase tracking-wider ${
-                        email.direction === 'sent' ? 'text-blue-400' : 'text-zinc-400'
-                      }`}>
+                      <span className={`text-[10px] font-medium uppercase tracking-wider ${email.direction === 'sent' ? 'text-blue-400' : 'text-zinc-400'}`}>
                         {email.direction === 'sent' ? '↑ Sent' : '↓ Received'}
                       </span>
                       <span className="text-[11px] text-zinc-600">{formatDate(email.createdAt)}</span>
                     </div>
                     <p className="truncate text-xs font-medium text-zinc-300">{email.subject}</p>
-                    <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-xs text-zinc-500">
-                      {email.body}
-                    </p>
+                    <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-xs text-zinc-500">{email.body}</p>
                   </div>
                 ))}
               </div>
@@ -525,36 +356,19 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
 
         </div>
 
-        {/* Footer actions */}
+        {/* Footer */}
         <div className="flex gap-3 border-t border-zinc-800 px-6 py-4">
-          <button
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-medium text-red-400 transition hover:border-red-500/40 hover:bg-red-500/10 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500/30"
-          >
+          <button onClick={handleDelete} disabled={isDeleting}
+            className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-medium text-red-400 transition hover:border-red-500/40 hover:bg-red-500/10 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500/30">
             {isDeleting ? 'Deleting…' : 'Delete'}
           </button>
-
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 transition hover:bg-white disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-zinc-300"
-          >
+          <button onClick={handleSave} disabled={isSaving}
+            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 transition hover:bg-white disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-zinc-300">
             {isSaving ? (
-              <>
-                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-400 border-t-zinc-700" />
-                Saving…
-              </>
+              <><span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-400 border-t-zinc-700" />Saving…</>
             ) : saveSuccess ? (
-              <>
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-600">
-                  <path d="M2 7l4 4 6-6" />
-                </svg>
-                Saved
-              </>
-            ) : (
-              'Save Changes'
-            )}
+              <><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-600"><path d="M2 7l4 4 6-6" /></svg>Saved</>
+            ) : 'Save Changes'}
           </button>
         </div>
       </aside>
