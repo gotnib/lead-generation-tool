@@ -13,6 +13,8 @@ export interface Lead {
   status: LeadStatus;
   notes: string | null;
   pitchEmail: string | null;
+  contactName: string | null;
+  contactEmail: string | null;
   createdAt: string;
   updatedAt: string;
 }

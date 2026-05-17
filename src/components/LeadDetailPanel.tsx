@@ -17,6 +17,8 @@ interface FormState {
   website: string;
   address: string;
   notes: string;
+  contactName: string;
+  contactEmail: string;
 }
 
 export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: Props) {
@@ -29,6 +31,9 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
   });
   const [pitchEmail, setPitchEmail] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isFindingContact, setIsFindingContact] = useState(false);
+  const [contactError, setContactError] = useState('');
+  const [contactEmailCopied, setContactEmailCopied] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -43,9 +48,12 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
         website: lead.website ?? '',
         address: lead.address ?? '',
         notes: lead.notes ?? '',
+        contactName: lead.contactName ?? '',
+        contactEmail: lead.contactEmail ?? '',
       });
       setPitchEmail(lead.pitchEmail ?? '');
       setPitchError('');
+      setContactError('');
       setSaveSuccess(false);
     }
   }, [lead]);
@@ -69,6 +77,8 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
           website: form.website || null,
           address: form.address || null,
           notes: form.notes || null,
+          contactName: form.contactName || null,
+          contactEmail: form.contactEmail || null,
         }),
       });
       const updated = await res.json();
@@ -86,6 +96,32 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
     await fetch(`/api/leads/${lead.id}`, { method: 'DELETE' });
     onDelete(lead.id);
     onClose();
+  };
+
+  const handleFindContact = async () => {
+    setIsFindingContact(true);
+    setContactError('');
+    try {
+      const res = await fetch(`/api/leads/${lead.id}/contact`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Search failed');
+      setForm((prev) => ({
+        ...prev,
+        contactName: data.contactName ?? '',
+        contactEmail: data.contactEmail ?? '',
+      }));
+    } catch (err: unknown) {
+      setContactError(err instanceof Error ? err.message : 'Failed to find contact');
+    } finally {
+      setIsFindingContact(false);
+    }
+  };
+
+  const handleCopyContactEmail = async () => {
+    if (!form.contactEmail) return;
+    await navigator.clipboard.writeText(form.contactEmail);
+    setContactEmailCopied(true);
+    setTimeout(() => setContactEmailCopied(false), 2000);
   };
 
   const handleGeneratePitch = async () => {
@@ -197,6 +233,73 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
                 />
               </div>
             ))}
+          </div>
+
+          {/* Contact person */}
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">
+                Contact Person
+              </span>
+              <button
+                onClick={handleFindContact}
+                disabled={isFindingContact}
+                className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-violet-400 transition hover:bg-violet-500/10 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+              >
+                {isFindingContact ? (
+                  <>
+                    <span className="h-3 w-3 animate-spin rounded-full border-2 border-violet-500/30 border-t-violet-400" />
+                    Searching…
+                  </>
+                ) : (
+                  <>
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                      <path d="M7 1l1.5 4H13L9.5 7.5l1.5 4L7 9.5 3 11.5l1.5-4L1 5h4.5L7 1z" fill="currentColor" />
+                    </svg>
+                    Find with AI
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-zinc-500">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={form.contactName}
+                  onChange={set('contactName')}
+                  placeholder="Owner / Manager"
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 flex items-center justify-between text-[11px] font-medium uppercase tracking-wider text-zinc-500">
+                  Email
+                  {form.contactEmail && (
+                    <button
+                      onClick={handleCopyContactEmail}
+                      className="normal-case tracking-normal text-blue-400 hover:text-blue-300 transition-colors"
+                    >
+                      {contactEmailCopied ? 'Copied!' : 'Copy'}
+                    </button>
+                  )}
+                </label>
+                <input
+                  type="text"
+                  value={form.contactEmail}
+                  onChange={set('contactEmail')}
+                  placeholder="email@business.com"
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                />
+              </div>
+            </div>
+
+            {contactError && (
+              <p className="mt-2 text-xs text-red-400">{contactError}</p>
+            )}
           </div>
 
           {/* Notes */}
