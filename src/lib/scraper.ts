@@ -10,16 +10,19 @@ export async function scrapeGoogleMaps(
   const StealthPlugin = require('puppeteer-extra-plugin-stealth');
   puppeteer.use(StealthPlugin());
 
-  // In production (Vercel) use @sparticuz/chromium — a minimal Chromium build
-  // for serverless environments. Locally, fall back to a system Chrome binary
-  // pointed to by CHROME_EXECUTABLE_PATH, or puppeteer-core's default.
+  // In production (Vercel) use @sparticuz/chromium-min — a ~5 MB package that
+  // downloads Chromium from GitHub at runtime into /tmp (cached per warm instance).
+  // The full @sparticuz/chromium bundles the binary at install time (~130 MB),
+  // which makes Vercel builds take 7+ minutes.
   let executablePath: string | undefined;
   let launchArgs: string[];
 
   if (process.env.NODE_ENV === 'production') {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const chromium = require('@sparticuz/chromium');
-    executablePath = await chromium.executablePath();
+    const chromium = require('@sparticuz/chromium-min');
+    const CHROMIUM_URL =
+      'https://github.com/Sparticuz/chromium/releases/download/v131.0.0/chromium-v131.0.0-pack.tar';
+    executablePath = await chromium.executablePath(CHROMIUM_URL);
     launchArgs = [...chromium.args, '--disable-gpu', '--single-process'];
   } else {
     executablePath = process.env.CHROME_EXECUTABLE_PATH || undefined;
