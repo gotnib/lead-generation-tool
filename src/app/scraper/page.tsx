@@ -32,7 +32,6 @@ export default function ScraperPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Scraping failed');
       setResults(data.businesses);
-      // Select all by default
       setSelected(new Set(data.businesses.map((_: ScrapedBusiness, i: number) => i)));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -82,7 +81,7 @@ export default function ScraperPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-zinc-100">Find Local Business Leads</h1>
         <p className="mt-1 text-sm text-zinc-500">
-          Scrape Google Maps by business category and city — then add leads directly to your pipeline.
+          Searches Google Maps then uses AI to surface only small businesses with weak or no web presence.
         </p>
       </div>
 
@@ -124,7 +123,7 @@ export default function ScraperPage() {
               {isLoading ? (
                 <>
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  Scanning Maps…
+                  Qualifying…
                 </>
               ) : (
                 <>
@@ -140,9 +139,15 @@ export default function ScraperPage() {
         </form>
 
         {isLoading && (
-          <div className="mt-6 flex items-center gap-3 rounded-lg bg-blue-500/10 px-4 py-3 text-sm text-blue-300">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500/30 border-t-blue-400" />
-            Opening Google Maps and scanning results — this may take up to 60 seconds…
+          <div className="mt-6 space-y-2">
+            <div className="flex items-center gap-3 rounded-lg bg-blue-500/10 px-4 py-3 text-sm text-blue-300">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500/30 border-t-blue-400" />
+              Searching Google Maps…
+            </div>
+            <div className="flex items-center gap-3 rounded-lg bg-violet-500/10 px-4 py-3 text-sm text-violet-300">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-violet-500/30 border-t-violet-400" />
+              AI is qualifying leads — filtering for small businesses with no web presence…
+            </div>
           </div>
         )}
       </div>
@@ -173,10 +178,13 @@ export default function ScraperPage() {
       {results.length > 0 && (
         <div className="mt-6">
           <div className="mb-4 flex items-center justify-between">
-            <p className="text-sm text-zinc-400">
-              <span className="font-medium text-zinc-200">{results.length}</span> businesses found
+            <p className="flex items-center gap-2 text-sm text-zinc-400">
+              <span className="font-medium text-zinc-200">{results.length}</span> qualified lead{results.length !== 1 ? 's' : ''} found
+              <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/15 px-2 py-0.5 text-[10px] font-medium text-violet-400">
+                AI filtered
+              </span>
               {selected.size > 0 && (
-                <span className="ml-2 text-zinc-500">· {selected.size} selected</span>
+                <span className="text-zinc-500">· {selected.size} selected</span>
               )}
             </p>
 
@@ -208,7 +216,7 @@ export default function ScraperPage() {
                       className="h-4 w-4 rounded border-zinc-600 bg-zinc-800 accent-blue-500"
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-zinc-500">Business</th>
+                  <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-zinc-500">Business · Why Chosen</th>
                   <th className="hidden px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-zinc-500 sm:table-cell">Address</th>
                   <th className="hidden px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-zinc-500 md:table-cell">Phone</th>
                   <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-zinc-500">Rating</th>
@@ -234,7 +242,10 @@ export default function ScraperPage() {
                     </td>
                     <td className="px-4 py-3.5">
                       <p className="font-medium text-zinc-100">{biz.businessName}</p>
-                      <p className="text-xs text-zinc-500">{biz.city}</p>
+                      {biz.reason && (
+                        <p className="mt-0.5 text-xs text-amber-400/90">{biz.reason}</p>
+                      )}
+                      <p className="mt-0.5 text-xs text-zinc-500">{biz.city}</p>
                     </td>
                     <td className="hidden px-4 py-3.5 sm:table-cell">
                       <p className="max-w-xs truncate text-sm text-zinc-400">{biz.address ?? '—'}</p>

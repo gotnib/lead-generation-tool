@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error('Scrape error:', err);
     return NextResponse.json(
-      { error: 'Scraping failed. Make sure Chromium is available.' },
+      { error: 'Scraping failed. Check your GOOGLE_PLACES_API_KEY and ANTHROPIC_API_KEY.' },
       { status: 500 }
     );
   }

@@ -26,6 +26,7 @@ export interface ScrapedBusiness {
   website: string | null;
   rating: number | null;
   reviewCount: number | null;
+  reason?: string;
 }
 
 export interface PipelineStage {

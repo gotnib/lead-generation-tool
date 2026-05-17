@@ -1,11 +1,7 @@
+import Anthropic from '@anthropic-ai/sdk';
 import type { ScrapedBusiness } from '@/types';
 
 // --- Google Places API (production) -----------------------------------
-// Fast (~1 s), reliable, no browser needed. Requires GOOGLE_PLACES_API_KEY.
-// Google gives $200/month free credit — ~1 000 text searches for a single user.
-//
-// Setup: console.cloud.google.com → new project → enable "Places API (New)"
-//        → Credentials → Create API key → add to Vercel env vars.
 
 async function scrapeViaPlacesAPI(
   category: string,
@@ -149,6 +145,74 @@ async function scrapeViaPuppeteer(
   }
 }
 
+// --- AI lead qualifier ------------------------------------------------
+// Filters raw results down to businesses that look like good prospects:
+// small operations, no/weak website, low review count.
+
+async function filterLeadsWithAI(businesses: ScrapedBusiness[]): Promise<ScrapedBusiness[]> {
+  if (businesses.length === 0) return businesses;
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    // Rule-based fallback when no API key
+    return businesses
+      .filter((b) => !b.website || (b.reviewCount !== null && b.reviewCount < 50))
+      .map((b) => ({
+        ...b,
+        reason: !b.website ? 'No website listed' : `Only ${b.reviewCount} reviews — small operation`,
+      }));
+  }
+
+  try {
+    const client = new Anthropic({ apiKey });
+
+    const list = businesses
+      .map(
+        (b, i) =>
+          `[${i}] ${b.businessName} | website: ${b.website ?? 'none'} | reviews: ${b.reviewCount ?? 'unknown'} | rating: ${b.rating ?? 'unknown'}`
+      )
+      .join('\n');
+
+    const msg = await client.messages.create({
+      model: 'claude-opus-4-7',
+      max_tokens: 1024,
+      messages: [
+        {
+          role: 'user',
+          content: `You are filtering local businesses for a web design / digital marketing agency looking for prospects who need help with their online presence.
+
+Select businesses that show clear signs of needing web help: no website, very few reviews (under 50), missing contact info, or appear to be small independent operations. Skip large chains, franchises (McDonald's, Subway, national brands), and businesses that obviously have a strong web presence.
+
+Businesses:
+${list}
+
+Return a JSON array for each selected business:
+[{"index": 0, "reason": "No website listed and only 8 reviews — small local shop with no web presence"}, ...]
+
+Keep each reason to one short sentence focusing on the specific signal that makes them a good prospect. Return only the JSON array, nothing else.`,
+        },
+      ],
+    });
+
+    const text = msg.content[0].type === 'text' ? msg.content[0].text.trim() : '[]';
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) return businesses;
+
+    const selected: { index: number; reason: string }[] = JSON.parse(jsonMatch[0]);
+    return selected
+      .filter((s) => s.index >= 0 && s.index < businesses.length)
+      .map((s) => ({ ...businesses[s.index], reason: s.reason }));
+  } catch {
+    // If AI call fails, fall back to simple rule-based filter
+    return businesses
+      .filter((b) => !b.website || (b.reviewCount !== null && b.reviewCount < 100))
+      .map((b) => ({
+        ...b,
+        reason: !b.website ? 'No website listed' : `Low review count (${b.reviewCount}) suggests small operation`,
+      }));
+  }
+}
+
 // --- Public entry point -----------------------------------------------
 
 export async function scrapeGoogleMaps(
@@ -156,8 +220,9 @@ export async function scrapeGoogleMaps(
   city: string
 ): Promise<ScrapedBusiness[]> {
   const placesKey = process.env.GOOGLE_PLACES_API_KEY;
-  if (placesKey) {
-    return scrapeViaPlacesAPI(category, city, placesKey);
-  }
-  return scrapeViaPuppeteer(category, city);
+  const raw = placesKey
+    ? await scrapeViaPlacesAPI(category, city, placesKey)
+    : await scrapeViaPuppeteer(category, city);
+
+  return filterLeadsWithAI(raw);
 }
