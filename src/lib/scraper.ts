@@ -1,6 +1,59 @@
 import type { ScrapedBusiness } from '@/types';
 
-export async function scrapeGoogleMaps(
+// --- Google Places API (production) -----------------------------------
+// Fast (~1 s), reliable, no browser needed. Requires GOOGLE_PLACES_API_KEY.
+// Google gives $200/month free credit — ~1 000 text searches for a single user.
+//
+// Setup: console.cloud.google.com → new project → enable "Places API (New)"
+//        → Credentials → Create API key → add to Vercel env vars.
+
+async function scrapeViaPlacesAPI(
+  category: string,
+  city: string,
+  apiKey: string
+): Promise<ScrapedBusiness[]> {
+  const response = await fetch('https://places.googleapis.com/v1/places:searchText', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': apiKey,
+      'X-Goog-FieldMask': [
+        'places.displayName',
+        'places.formattedAddress',
+        'places.nationalPhoneNumber',
+        'places.websiteUri',
+        'places.rating',
+        'places.userRatingCount',
+      ].join(','),
+    },
+    body: JSON.stringify({ textQuery: `${category} in ${city}`, maxResultCount: 20 }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(`Places API ${response.status}: ${JSON.stringify(err)}`);
+  }
+
+  const data = await response.json();
+  const places: Record<string, unknown>[] = data.places ?? [];
+
+  return places
+    .map((p) => ({
+      businessName: (p.displayName as { text: string } | undefined)?.text ?? '',
+      category,
+      city,
+      address: (p.formattedAddress as string | undefined) ?? null,
+      phone: (p.nationalPhoneNumber as string | undefined) ?? null,
+      website: (p.websiteUri as string | undefined) ?? null,
+      rating: (p.rating as number | undefined) ?? null,
+      reviewCount: (p.userRatingCount as number | undefined) ?? null,
+    }))
+    .filter((b) => b.businessName.length > 0);
+}
+
+// --- Puppeteer fallback (local dev without GOOGLE_PLACES_API_KEY) -----
+
+async function scrapeViaPuppeteer(
   category: string,
   city: string
 ): Promise<ScrapedBusiness[]> {
@@ -18,21 +71,12 @@ export async function scrapeGoogleMaps(
   } else {
     executablePath = process.env.CHROME_EXECUTABLE_PATH || undefined;
     launchArgs = [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--single-process',
+      '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas', '--no-first-run', '--no-zygote', '--single-process',
     ];
   }
 
-  const browser = await puppeteer.launch({
-    args: launchArgs,
-    executablePath,
-    headless: true,
-  });
+  const browser = await puppeteer.launch({ args: launchArgs, executablePath, headless: true });
 
   try {
     const page = await browser.newPage();
@@ -40,7 +84,6 @@ export async function scrapeGoogleMaps(
     await page.setUserAgent(
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     );
-
     await page.evaluateOnNewDocument(() => {
       Object.defineProperty(navigator, 'webdriver', { get: () => false });
       // @ts-expect-error window.chrome is not typed
@@ -49,138 +92,72 @@ export async function scrapeGoogleMaps(
       Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3] });
     });
 
-    const searchQuery = `${category} in ${city}`;
-    const url = `https://www.google.com/maps/search/${encodeURIComponent(searchQuery)}?hl=en`;
-
+    const url = `https://www.google.com/maps/search/${encodeURIComponent(`${category} in ${city}`)}?hl=en`;
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
-    // Log page title so it shows up in Vercel function logs for debugging
-    const title = await page.title();
-    console.log('[scraper] page title:', title);
-
-    // Dismiss any consent / cookie interstitial — try every known button variant
-    const consentSelectors = [
-      'button[aria-label="Accept all"]',
-      'button[aria-label="Agree to the use of cookies and other data for the purposes described"]',
-      '#L2AGLb',           // "I agree" on google.com consent page
-      'button.tHlp8d',     // another consent variant
-      'form[action*="consent"] button[type="submit"]',
-    ];
-    for (const sel of consentSelectors) {
+    for (const sel of ['button[aria-label="Accept all"]', '#L2AGLb', 'button.tHlp8d']) {
       try {
         const btn = await page.$(sel);
-        if (btn) {
-          await btn.click();
-          console.log('[scraper] dismissed consent via', sel);
-          await new Promise((r) => setTimeout(r, 2000));
-          break;
-        }
-      } catch {
-        // try next selector
-      }
+        if (btn) { await btn.click(); await new Promise((r) => setTimeout(r, 1500)); break; }
+      } catch { /* try next */ }
     }
 
-    // Wait for feed — fall back to any place link if the feed role isn't present
-    try {
-      await page.waitForSelector('[role="feed"]', { timeout: 20000 });
-    } catch {
-      // Feed selector missed — check whether we landed on a single result or a blocked page
-      const hasSingleResult = await page.$('a[href*="/maps/place/"]');
-      if (!hasSingleResult) {
-        const bodyText = await page.evaluate(() => document.body.innerText.slice(0, 300));
-        console.log('[scraper] feed not found, body snippet:', bodyText);
-        throw new Error('Google Maps did not return a results list. Try a broader search term.');
-      }
+    await page.waitForSelector('[role="feed"]', { timeout: 20000 });
+    await new Promise((r) => setTimeout(r, 1500));
+
+    for (let i = 0; i < 4; i++) {
+      await page.evaluate(() => document.querySelector('[role="feed"]')?.scrollBy(0, 800));
+      await new Promise((r) => setTimeout(r, 600));
     }
 
-    await new Promise((r) => setTimeout(r, 2000));
-
-    // Scroll to load more results
-    for (let i = 0; i < 6; i++) {
-      await page.evaluate(() => {
-        const feed = document.querySelector('[role="feed"]');
-        if (feed) feed.scrollBy(0, 800);
+    const businesses: ScrapedBusiness[] = await page.evaluate((cat: string, cty: string) => {
+      const results: ScrapedBusiness[] = [];
+      const feed = document.querySelector('[role="feed"]');
+      if (!feed) return results;
+      feed.querySelectorAll('a[href*="/maps/place/"]').forEach((anchor: Element) => {
+        try {
+          const container = anchor.closest('div.Nv2PK') ?? anchor.parentElement;
+          if (!container) return;
+          const name = anchor.getAttribute('aria-label') ||
+            container.querySelector('[class*="fontHeadlineSmall"]')?.textContent?.trim() || '';
+          if (!name || name.length < 2) return;
+          const rating = parseFloat(container.querySelector('span.MW4etd')?.textContent || '') || null;
+          const reviewCount = parseInt(
+            (container.querySelector('span.UY7F9')?.textContent || '').replace(/\D/g, '')
+          ) || null;
+          const infoTexts = Array.from(container.querySelectorAll('.Io6YTe, .W4Etje'))
+            .map((el) => el.textContent?.trim()).filter(Boolean);
+          results.push({
+            businessName: name, category: cat, city: cty,
+            address: infoTexts[infoTexts.length - 1] ?? null,
+            phone: null, website: null,
+            rating: isNaN(rating as number) ? null : rating, reviewCount,
+          });
+        } catch { /* skip */ }
       });
-      await new Promise((r) => setTimeout(r, 700));
-    }
-
-    const businesses: ScrapedBusiness[] = await page.evaluate(
-      (cat: string, cty: string) => {
-        const results: ScrapedBusiness[] = [];
-        const feed = document.querySelector('[role="feed"]');
-        if (!feed) return results;
-
-        const anchors = feed.querySelectorAll('a[href*="/maps/place/"]');
-
-        anchors.forEach((anchor: Element) => {
-          try {
-            const container = anchor.closest('div.Nv2PK') ?? anchor.parentElement;
-            if (!container) return;
-
-            const name =
-              anchor.getAttribute('aria-label') ||
-              container.querySelector('[class*="fontHeadlineSmall"]')?.textContent?.trim() ||
-              container.querySelector('h3')?.textContent?.trim();
-
-            if (!name || name.length < 2) return;
-
-            const ratingEl = container.querySelector('span.MW4etd');
-            const rating = ratingEl ? parseFloat(ratingEl.textContent || '0') || null : null;
-
-            const reviewEl = container.querySelector('span.UY7F9');
-            const reviewCount = reviewEl
-              ? parseInt((reviewEl.textContent || '').replace(/[^0-9]/g, '')) || null
-              : null;
-
-            const infoEls = container.querySelectorAll(
-              '.Io6YTe, .W4Etje, [class*="fontBodyMedium"] span'
-            );
-            const infoTexts = Array.from(infoEls)
-              .map((el) => el.textContent?.trim())
-              .filter(Boolean);
-
-            const address = infoTexts.length > 0 ? infoTexts[infoTexts.length - 1] ?? null : null;
-
-            const phoneMatch = infoTexts.find(
-              (t) => /(\+?[\d\s\-().]{7,20})/.test(t ?? '') && !t?.includes(',')
-            );
-            const websiteText = infoTexts.find(
-              (t) =>
-                t?.includes('.') && !t?.includes(' ') && !t?.match(/^\d/) && t !== address
-            );
-
-            results.push({
-              businessName: name,
-              category: cat,
-              city: cty,
-              address: address || null,
-              phone: phoneMatch || null,
-              website: websiteText || null,
-              rating: isNaN(rating as number) ? null : rating,
-              reviewCount,
-            });
-          } catch {
-            // skip malformed item
-          }
-        });
-
-        return results;
-      },
-      category,
-      city
-    );
-
-    console.log('[scraper] extracted', businesses.length, 'businesses');
+      return results;
+    }, category, city);
 
     const seen = new Set<string>();
-    return businesses
-      .filter((b) => {
-        if (seen.has(b.businessName)) return false;
-        seen.add(b.businessName);
-        return true;
-      })
-      .slice(0, 20);
+    return businesses.filter((b) => {
+      if (seen.has(b.businessName)) return false;
+      seen.add(b.businessName);
+      return true;
+    }).slice(0, 20);
   } finally {
     await browser.close();
   }
+}
+
+// --- Public entry point -----------------------------------------------
+
+export async function scrapeGoogleMaps(
+  category: string,
+  city: string
+): Promise<ScrapedBusiness[]> {
+  const placesKey = process.env.GOOGLE_PLACES_API_KEY;
+  if (placesKey) {
+    return scrapeViaPlacesAPI(category, city, placesKey);
+  }
+  return scrapeViaPuppeteer(category, city);
 }
