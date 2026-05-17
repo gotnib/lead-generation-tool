@@ -122,6 +122,7 @@ export default function DashboardClient({ initialLeads }: Props) {
           initialLeads={leads}
           onLeadClick={setSelectedLead}
           onLeadUpdate={handleLeadUpdate}
+          onLeadDelete={handleLeadDelete}
         />
       )}
 

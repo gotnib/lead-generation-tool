@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { Lead } from '@/types';
 import { PIPELINE_STAGES } from '@/types';
 import KanbanColumn from './KanbanColumn';
@@ -9,12 +9,18 @@ interface Props {
   initialLeads: Lead[];
   onLeadClick: (lead: Lead) => void;
   onLeadUpdate: (lead: Lead) => void;
+  onLeadDelete: (leadId: string) => void;
 }
 
-export default function KanbanBoard({ initialLeads, onLeadClick, onLeadUpdate }: Props) {
+export default function KanbanBoard({ initialLeads, onLeadClick, onLeadUpdate, onLeadDelete }: Props) {
   const [leads, setLeads] = useState<Lead[]>(initialLeads);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
+
+  // Sync when a lead is deleted via the detail panel
+  useEffect(() => {
+    setLeads(initialLeads);
+  }, [initialLeads]);
 
   const handleDragStart = useCallback((leadId: string, e: React.DragEvent) => {
     setDraggedId(leadId);
@@ -56,6 +62,16 @@ export default function KanbanBoard({ initialLeads, onLeadClick, onLeadUpdate }:
     [draggedId, leads, onLeadUpdate]
   );
 
+  const handleDeleteLead = useCallback(
+    async (leadId: string) => {
+      if (!confirm('Remove this lead from your pipeline?')) return;
+      setLeads((prev) => prev.filter((l) => l.id !== leadId));
+      onLeadDelete(leadId);
+      await fetch(`/api/leads/${leadId}`, { method: 'DELETE' });
+    },
+    [onLeadDelete]
+  );
+
   // Keep local state in sync when the detail panel saves a lead
   const syncLead = useCallback((updated: Lead) => {
     setLeads((prev) => prev.map((l) => (l.id === updated.id ? updated : l)));
@@ -77,9 +93,9 @@ export default function KanbanBoard({ initialLeads, onLeadClick, onLeadUpdate }:
           isDragTarget={dropTarget === stage.id}
           onLeadClick={(lead) => {
             onLeadClick(lead);
-            // Bind external sync so detail panel updates flow back in
             (lead as Lead & { __sync?: (l: Lead) => void }).__sync = syncLead;
           }}
+          onLeadDelete={handleDeleteLead}
           onDragStart={handleDragStart}
           onDragEnter={() => handleDragEnter(stage.id)}
           onDragLeave={handleDragLeave}

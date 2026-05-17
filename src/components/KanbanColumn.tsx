@@ -8,6 +8,7 @@ interface Props {
   leads: Lead[];
   isDragTarget: boolean;
   onLeadClick: (lead: Lead) => void;
+  onLeadDelete: (leadId: string) => void;
   onDragStart: (leadId: string, e: React.DragEvent) => void;
   onDragEnter: () => void;
   onDragLeave: (e: React.DragEvent) => void;
@@ -19,6 +20,7 @@ export default function KanbanColumn({
   leads,
   isDragTarget,
   onLeadClick,
+  onLeadDelete,
   onDragStart,
   onDragEnter,
   onDragLeave,
@@ -56,6 +58,7 @@ export default function KanbanColumn({
             stage={stage}
             onClick={() => onLeadClick(lead)}
             onDragStart={(e) => onDragStart(lead.id, e)}
+            onDelete={() => onLeadDelete(lead.id)}
           />
         ))}
 
