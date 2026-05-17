@@ -23,18 +23,6 @@ function stripHtml(html: string): string {
     .trim();
 }
 
-function guessDomains(businessName: string): string[] {
-  const slug = businessName
-    .toLowerCase()
-    .replace(/[''']/g, '')
-    .replace(/\b(llc|inc|co|corp|company|services|shop|the|and|&)\b/g, '')
-    .replace(/[^a-z0-9]+/g, '')
-    .trim();
-
-  return slug
-    ? [`https://${slug}.com`, `https://www.${slug}.com`]
-    : [];
-}
 
 async function fetchPage(url: string): Promise<string> {
   const res = await fetch(url, {
@@ -83,34 +71,18 @@ export async function findContact(lead: LeadInfo): Promise<ContactResult> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
 
-  let context = '';
-  const urlsToTry: string[] = [];
+  let context = 'No website available for this business.';
 
   if (lead.website) {
-    urlsToTry.push(lead.website);
-  } else {
-    urlsToTry.push(...guessDomains(lead.businessName));
-  }
-
-  for (const url of urlsToTry) {
     try {
-      const { text, emails } = await scrapeWebsite(url);
-      if (text.length > 50 || emails.length > 0) {
-        const emailList = emails.length > 0
-          ? `Emails found: ${emails.join(', ')}`
-          : 'No email addresses found on site.';
-        context = `Website: ${url}\n\n${text}\n\n${emailList}`;
-        break;
-      }
+      const { text, emails } = await scrapeWebsite(lead.website);
+      const emailList = emails.length > 0
+        ? `Emails found: ${emails.join(', ')}`
+        : 'No email addresses found on site.';
+      context = `Website: ${lead.website}\n\n${text}\n\n${emailList}`;
     } catch {
-      // try next
+      context = `Website (${lead.website}) could not be fetched.`;
     }
-  }
-
-  if (!context) {
-    context = lead.website
-      ? `Website (${lead.website}) could not be fetched.`
-      : 'No website available. No domain could be found.';
   }
 
   const client = new Anthropic({ apiKey });
