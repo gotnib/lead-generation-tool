@@ -16,8 +16,6 @@
     "@sparticuz/chromium-min": "^131.0.0",
     "next": "^15.0.0",
     "puppeteer-core": "^21.0.0",
-    "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

@@ -5,19 +5,14 @@ export async function scrapeGoogleMaps(
   city: string
 ): Promise<ScrapedBusiness[]> {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const puppeteer = require('puppeteer-extra');
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-  puppeteer.use(StealthPlugin());
+  const puppeteer = require('puppeteer-core');
 
-  // In production (Vercel) use @sparticuz/chromium-min — a ~5 MB package that
-  // downloads Chromium from GitHub at runtime into /tmp (cached per warm instance).
-  // The full @sparticuz/chromium bundles the binary at install time (~130 MB),
-  // which makes Vercel builds take 7+ minutes.
   let executablePath: string | undefined;
   let launchArgs: string[];
 
   if (process.env.NODE_ENV === 'production') {
+    // @sparticuz/chromium-min downloads Chromium from GitHub into /tmp at runtime.
+    // The binary is cached for the lifetime of the warm Lambda instance.
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const chromium = require('@sparticuz/chromium-min');
     const CHROMIUM_URL =
@@ -50,6 +45,15 @@ export async function scrapeGoogleMaps(
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     );
 
+    // Basic bot-detection evasion without puppeteer-extra-plugin-stealth
+    await page.evaluateOnNewDocument(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => false });
+      // @ts-expect-error window.chrome is not typed
+      window.chrome = { runtime: {} };
+      Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
+      Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3] });
+    });
+
     const searchQuery = `${category} in ${city}`;
     const url = `https://www.google.com/maps/search/${encodeURIComponent(searchQuery)}`;
 
@@ -66,7 +70,6 @@ export async function scrapeGoogleMaps(
       // No consent dialog — continue
     }
 
-    // Wait for the results feed
     await page.waitForSelector('[role="feed"]', { timeout: 15000 });
     await new Promise((r) => setTimeout(r, 2000));
 
@@ -79,7 +82,6 @@ export async function scrapeGoogleMaps(
       await new Promise((r) => setTimeout(r, 800));
     }
 
-    // Extract business data from the sidebar list
     const businesses: ScrapedBusiness[] = await page.evaluate(
       (cat: string, cty: string) => {
         const results: ScrapedBusiness[] = [];
@@ -108,7 +110,9 @@ export async function scrapeGoogleMaps(
               ? parseInt((reviewEl.textContent || '').replace(/[^0-9]/g, '')) || null
               : null;
 
-            const infoEls = container.querySelectorAll('.Io6YTe, .W4Etje, [class*="fontBodyMedium"] span');
+            const infoEls = container.querySelectorAll(
+              '.Io6YTe, .W4Etje, [class*="fontBodyMedium"] span'
+            );
             const infoTexts = Array.from(infoEls)
               .map((el) => el.textContent?.trim())
               .filter(Boolean);
@@ -120,7 +124,8 @@ export async function scrapeGoogleMaps(
             );
 
             const websiteText = infoTexts.find(
-              (t) => t?.includes('.') && !t?.includes(' ') && !t?.match(/^\d/) && t !== address
+              (t) =>
+                t?.includes('.') && !t?.includes(' ') && !t?.match(/^\d/) && t !== address
             );
 
             results.push({
@@ -144,7 +149,6 @@ export async function scrapeGoogleMaps(
       city
     );
 
-    // De-duplicate by name
     const seen = new Set<string>();
     return businesses
       .filter((b) => {
