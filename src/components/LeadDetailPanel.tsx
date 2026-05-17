@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Lead } from '@/types';
+import type { Lead, EmailMessage } from '@/types';
 import { PIPELINE_STAGES } from '@/types';
 
 interface Props {
@@ -19,6 +19,12 @@ interface FormState {
   notes: string;
   contactName: string;
   contactEmail: string;
+}
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleString('en-US', {
+    month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+  });
 }
 
 export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: Props) {
@@ -42,6 +48,13 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
   const [pitchError, setPitchError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  const [emails, setEmails] = useState<EmailMessage[]>([]);
+  const [isLoadingEmails, setIsLoadingEmails] = useState(false);
+  const [emailSubject, setEmailSubject] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [sendError, setSendError] = useState('');
+  const [sendSuccess, setSendSuccess] = useState(false);
+
   useEffect(() => {
     if (lead) {
       setForm({
@@ -57,8 +70,21 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       setPitchError('');
       setContactError('');
       setSaveSuccess(false);
+      setSendError('');
+      setSendSuccess(false);
     }
   }, [lead]);
+
+  // Load email thread when lead changes
+  useEffect(() => {
+    if (!lead) return;
+    setIsLoadingEmails(true);
+    fetch(`/api/leads/${lead.id}/emails`)
+      .then((r) => r.json())
+      .then((data) => setEmails(Array.isArray(data) ? data : []))
+      .catch(() => setEmails([]))
+      .finally(() => setIsLoadingEmails(false));
+  }, [lead?.id]);
 
   if (!lead) return null;
 
@@ -134,6 +160,9 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Generation failed');
       setPitchEmail(data.pitchEmail);
+      // Pre-fill subject from generated email's Subject: line
+      const match = data.pitchEmail.match(/^Subject:\s*(.+?)$/m);
+      if (match) setEmailSubject(match[1].trim());
     } catch (err: unknown) {
       setPitchError(err instanceof Error ? err.message : 'Failed to generate email');
     } finally {
@@ -145,6 +174,34 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
     await navigator.clipboard.writeText(pitchEmail);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSendEmail = async () => {
+    if (!form.contactEmail) return;
+    setSendError('');
+    setSendSuccess(false);
+    setIsSending(true);
+
+    // Strip the "Subject: …\n\n" header from the pitch body before sending
+    const body = pitchEmail.replace(/^Subject:[^\n]*\n\n?/, '').trim();
+    const subject = emailSubject.trim() || `Quick note — ${lead.businessName}`;
+
+    try {
+      const res = await fetch(`/api/leads/${lead.id}/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subject, body }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Send failed');
+      setEmails((prev) => [...prev, { ...data, direction: 'sent' } as EmailMessage]);
+      setSendSuccess(true);
+      setTimeout(() => setSendSuccess(false), 3000);
+    } catch (err: unknown) {
+      setSendError(err instanceof Error ? err.message : 'Failed to send');
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -217,9 +274,9 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
           <div className="grid grid-cols-2 gap-4">
             {(
               [
-                { key: 'phone',   label: 'Phone',        placeholder: '+1 (555) 000-0000', span: 1 },
-                { key: 'website', label: 'Website',       placeholder: 'example.com',       span: 1 },
-                { key: 'address', label: 'Address',       placeholder: '123 Main St…',      span: 2 },
+                { key: 'phone',   label: 'Phone',   placeholder: '+1 (555) 000-0000', span: 1 },
+                { key: 'website', label: 'Website', placeholder: 'example.com',       span: 1 },
+                { key: 'address', label: 'Address', placeholder: '123 Main St…',      span: 2 },
               ] as const
             ).map(({ key, label, placeholder, span }) => (
               <div key={key} className={span === 2 ? 'col-span-2' : ''}>
@@ -283,7 +340,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
                   {form.contactEmail && (
                     <button
                       onClick={handleCopyContactEmail}
-                      className="normal-case tracking-normal text-blue-400 hover:text-blue-300 transition-colors"
+                      className="normal-case tracking-normal text-blue-400 transition-colors hover:text-blue-300"
                     >
                       {contactEmailCopied ? 'Copied!' : 'Copy'}
                     </button>
@@ -312,7 +369,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
             <textarea
               value={form.notes}
               onChange={set('notes')}
-              rows={4}
+              rows={3}
               placeholder="Call notes, follow-up reminders, context…"
               className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
             />
@@ -377,11 +434,95 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
               <textarea
                 readOnly
                 value={pitchEmail}
-                rows={12}
+                rows={10}
                 className="mt-3 w-full resize-none rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2.5 font-mono text-xs text-zinc-300 focus:outline-none"
               />
             )}
+
+            {/* Send controls — only shown when there's a pitch email and a contact email */}
+            {pitchEmail && form.contactEmail && (
+              <div className="mt-3 space-y-2">
+                <input
+                  type="text"
+                  value={emailSubject}
+                  onChange={(e) => setEmailSubject(e.target.value)}
+                  placeholder="Subject line"
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                />
+                <button
+                  onClick={handleSendEmail}
+                  disabled={isSending}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+                >
+                  {isSending ? (
+                    <>
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      Sending…
+                    </>
+                  ) : (
+                    <>
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2L2 7l5 2.5L9.5 14 14 2z" />
+                      </svg>
+                      Send to {form.contactEmail}
+                    </>
+                  )}
+                </button>
+                {sendError && <p className="text-xs text-red-400">{sendError}</p>}
+                {sendSuccess && <p className="text-xs text-emerald-400">Email sent.</p>}
+              </div>
+            )}
           </div>
+
+          {/* Email thread */}
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">
+                Correspondence
+              </span>
+              {emails.length > 0 && (
+                <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] text-zinc-400">
+                  {emails.length}
+                </span>
+              )}
+            </div>
+
+            {isLoadingEmails ? (
+              <div className="flex items-center gap-2 py-4 text-xs text-zinc-600">
+                <span className="h-3 w-3 animate-spin rounded-full border-2 border-zinc-700 border-t-zinc-500" />
+                Loading…
+              </div>
+            ) : emails.length === 0 ? (
+              <p className="py-4 text-center text-xs text-zinc-600">No emails yet</p>
+            ) : (
+              <div className="space-y-2">
+                {emails.map((email) => (
+                  <div
+                    key={email.id}
+                    className={`rounded-lg border p-3 ${
+                      email.direction === 'sent'
+                        ? 'border-blue-500/20 bg-blue-500/5'
+                        : 'border-zinc-700 bg-zinc-800/50'
+                    }`}
+                  >
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <span className={`text-[10px] font-medium uppercase tracking-wider ${
+                        email.direction === 'sent' ? 'text-blue-400' : 'text-zinc-400'
+                      }`}>
+                        {email.direction === 'sent' ? '↑ Sent' : '↓ Received'}
+                      </span>
+                      <span className="text-[11px] text-zinc-600">{formatDate(email.createdAt)}</span>
+                    </div>
+                    <p className="truncate text-xs font-medium text-zinc-300">{email.subject}</p>
+                    <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-xs text-zinc-500">
+                      {email.body}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
         </div>
 
         {/* Footer actions */}

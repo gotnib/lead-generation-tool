@@ -19,6 +19,17 @@ export interface Lead {
   updatedAt: string;
 }
 
+export interface EmailMessage {
+  id: string;
+  leadId: string;
+  direction: 'sent' | 'received';
+  subject: string;
+  body: string;
+  fromAddr: string;
+  toAddr: string;
+  createdAt: string;
+}
+
 export interface ScrapedBusiness {
   businessName: string;
   category: string;
