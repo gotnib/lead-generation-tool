@@ -28,6 +28,8 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
     website: '',
     address: '',
     notes: '',
+    contactName: '',
+    contactEmail: '',
   });
   const [pitchEmail, setPitchEmail] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
