@@ -1,7 +1,7 @@
 {
   "framework": "nextjs",
   "installCommand": "PUPPETEER_SKIP_DOWNLOAD=true npm install",
-  "buildCommand": "npm run build",
+  "buildCommand": "prisma db push && npm run build",
   "functions": {
     "src/app/api/scrape/route.ts": {
       "memory": 1024,
