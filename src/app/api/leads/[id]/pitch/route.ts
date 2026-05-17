@@ -4,6 +4,32 @@ import { prisma } from '@/lib/prisma';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+const SYSTEM_PROMPT = `You write cold outreach emails that sound like a real person wrote them — not a marketer, not an AI, not a template.
+
+Style rules:
+- Vary sentence length naturally. Mix short punchy sentences with longer ones.
+- Use conversational phrasing. Write how a smart, confident person texts or emails.
+- Sound direct and grounded. No fluff, no hype, no buzzwords.
+- Keep it under 150 words total. Every sentence has to earn its place.
+
+Hard avoids — never use these words or phrases:
+- leverage, seamlessly, robust, unlock, game changer, dive into, streamline
+- "In today's fast-paced world", "I hope this email finds you well"
+- Excessive enthusiasm, forced positivity, or empty openers
+- Three-part lists ("A, B, and C") — they feel templated
+- Em dashes as a crutch
+- Generic claims without specifics
+
+The email should feel like:
+- A real person reaching out after noticing something specific
+- Someone who knows what they're talking about but isn't trying to impress
+- A low-pressure ask, not a sales pitch
+
+Format exactly as:
+Subject: [subject line]
+
+[email body]`;
+
 export async function POST(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -13,44 +39,42 @@ export async function POST(
   const lead = await prisma.lead.findUnique({ where: { id } });
   if (!lead) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  const ratingInfo = lead.rating
-    ? `${lead.rating} stars (${lead.reviewCount ?? 0} reviews)`
-    : 'Not rated';
+  const greeting = lead.contactName ? `Hi ${lead.contactName.split(' ')[0]},` : 'Hi,';
+  const ratingLine = lead.rating
+    ? `${lead.rating} stars with ${lead.reviewCount ?? 0} reviews`
+    : 'no rating data';
+  const websiteLine = lead.website ? `Website: ${lead.website}` : 'No website listed';
 
-  const prompt = `You are a skilled B2B sales copywriter. Write a compelling cold outreach email for this local business lead.
+  const prompt = `Write a cold outreach email for this business. I offer web design and digital marketing services to local businesses.
 
 Business: ${lead.businessName}
-Category: ${lead.category}
+Type: ${lead.category}
 Location: ${lead.city}
-Rating: ${ratingInfo}
-${lead.website ? `Website: ${lead.website}` : ''}
+Reviews: ${ratingLine}
+${websiteLine}
 ${lead.address ? `Address: ${lead.address}` : ''}
 
-Write a short, professional cold pitch email that:
-1. Opens with a specific, personalized hook related to their business or location
-2. Introduces our digital marketing / lead generation services in 1-2 sentences
-3. States a concrete, believable outcome or benefit (e.g., "helped a similar ${lead.category} in ${lead.city} get 30% more calls in 60 days")
-4. Has a clear, low-friction call to action (15-min call, quick question, etc.)
-5. Is under 150 words total
-6. Sounds human, not salesy or templated
-7. Ends with a real-looking name and title
+Start the email with: ${greeting}
 
-Format the response as:
-Subject: [subject line]
+The email should:
+- Open with one specific observation about their business (their lack of web presence, their review count, something real — not a compliment)
+- Briefly say what I do and what kind of result I've gotten for a similar business
+- End with one clear, low-friction ask (a quick call, a question, whatever fits)
+- Sign off with a real-looking name and casual title
 
-[email body]`;
+Do not explain what you're doing. Just write the email.`;
 
   try {
     const message = await anthropic.messages.create({
       model: 'claude-opus-4-7',
       max_tokens: 512,
+      system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: prompt }],
     });
 
     const pitchEmail =
       message.content[0].type === 'text' ? message.content[0].text : '';
 
-    // Persist so re-opening the panel shows the last generated email
     await prisma.lead.update({ where: { id }, data: { pitchEmail } });
 
     return NextResponse.json({ pitchEmail });
