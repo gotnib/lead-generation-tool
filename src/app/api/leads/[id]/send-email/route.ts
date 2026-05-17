@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import { prisma } from '@/lib/prisma';
 
 export const maxDuration = 30;
@@ -14,10 +14,15 @@ export async function POST(
   if (!lead) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   if (!lead.contactEmail) return NextResponse.json({ error: 'No contact email set for this lead' }, { status: 400 });
 
-  const fromEmail = process.env.FROM_EMAIL;
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!fromEmail || !apiKey) {
-    return NextResponse.json({ error: 'Email not configured. Add RESEND_API_KEY and FROM_EMAIL to env vars.' }, { status: 500 });
+  const gmailUser = process.env.GMAIL_USER;
+  const gmailPass = process.env.GMAIL_APP_PASSWORD;
+  const fromEmail = process.env.FROM_EMAIL ?? gmailUser;
+
+  if (!gmailUser || !gmailPass) {
+    return NextResponse.json(
+      { error: 'Email not configured. Add GMAIL_USER and GMAIL_APP_PASSWORD to env vars.' },
+      { status: 500 }
+    );
   }
 
   const { subject, body } = await req.json();
@@ -25,19 +30,19 @@ export async function POST(
     return NextResponse.json({ error: 'Subject and body are required' }, { status: 400 });
   }
 
-  const resend = new Resend(apiKey);
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: { user: gmailUser, pass: gmailPass },
+  });
 
-  const { error } = await resend.emails.send({
-    from: fromEmail,
+  await transporter.sendMail({
+    from: `"${fromEmail}" <${fromEmail}>`,
     to: lead.contactEmail,
     subject: subject.trim(),
     text: body.trim(),
   });
-
-  if (error) {
-    console.error('Resend error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
 
   const email = await prisma.email.create({
     data: {
@@ -45,7 +50,7 @@ export async function POST(
       direction: 'sent',
       subject: subject.trim(),
       body: body.trim(),
-      fromAddr: fromEmail,
+      fromAddr: fromEmail ?? gmailUser,
       toAddr: lead.contactEmail,
     },
   });
