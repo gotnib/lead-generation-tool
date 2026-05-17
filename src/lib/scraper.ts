@@ -4,16 +4,26 @@ export async function scrapeGoogleMaps(
   category: string,
   city: string
 ): Promise<ScrapedBusiness[]> {
-  // Dynamic require to avoid bundling issues
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const puppeteer = require('puppeteer-extra');
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const StealthPlugin = require('puppeteer-extra-plugin-stealth');
   puppeteer.use(StealthPlugin());
 
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: [
+  // In production (Vercel) use @sparticuz/chromium — a minimal Chromium build
+  // for serverless environments. Locally, fall back to a system Chrome binary
+  // pointed to by CHROME_EXECUTABLE_PATH, or puppeteer-core's default.
+  let executablePath: string | undefined;
+  let launchArgs: string[];
+
+  if (process.env.NODE_ENV === 'production') {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const chromium = require('@sparticuz/chromium');
+    executablePath = await chromium.executablePath();
+    launchArgs = [...chromium.args, '--disable-gpu', '--single-process'];
+  } else {
+    executablePath = process.env.CHROME_EXECUTABLE_PATH || undefined;
+    launchArgs = [
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
@@ -21,7 +31,13 @@ export async function scrapeGoogleMaps(
       '--no-first-run',
       '--no-zygote',
       '--single-process',
-    ],
+    ];
+  }
+
+  const browser = await puppeteer.launch({
+    args: launchArgs,
+    executablePath,
+    headless: true,
   });
 
   try {
@@ -44,7 +60,7 @@ export async function scrapeGoogleMaps(
         await new Promise((r) => setTimeout(r, 1500));
       }
     } catch {
-      // No consent dialog
+      // No consent dialog — continue
     }
 
     // Wait for the results feed
@@ -60,14 +76,13 @@ export async function scrapeGoogleMaps(
       await new Promise((r) => setTimeout(r, 800));
     }
 
-    // Extract list-view data
+    // Extract business data from the sidebar list
     const businesses: ScrapedBusiness[] = await page.evaluate(
       (cat: string, cty: string) => {
         const results: ScrapedBusiness[] = [];
         const feed = document.querySelector('[role="feed"]');
         if (!feed) return results;
 
-        // Each result is an anchor or a container div
         const anchors = feed.querySelectorAll('a[href*="/maps/place/"]');
 
         anchors.forEach((anchor: Element) => {
@@ -75,7 +90,6 @@ export async function scrapeGoogleMaps(
             const container = anchor.closest('div.Nv2PK') ?? anchor.parentElement;
             if (!container) return;
 
-            // Business name – prefer aria-label on the anchor
             const name =
               anchor.getAttribute('aria-label') ||
               container.querySelector('[class*="fontHeadlineSmall"]')?.textContent?.trim() ||
@@ -83,38 +97,27 @@ export async function scrapeGoogleMaps(
 
             if (!name || name.length < 2) return;
 
-            // Rating
             const ratingEl = container.querySelector('span.MW4etd');
             const rating = ratingEl ? parseFloat(ratingEl.textContent || '0') || null : null;
 
-            // Review count – "(123)"
             const reviewEl = container.querySelector('span.UY7F9');
             const reviewCount = reviewEl
               ? parseInt((reviewEl.textContent || '').replace(/[^0-9]/g, '')) || null
               : null;
 
-            // Address / category lines
-            const infoEls = container.querySelectorAll(
-              '.Io6YTe, .W4Etje, [class*="fontBodyMedium"] span'
-            );
+            const infoEls = container.querySelectorAll('.Io6YTe, .W4Etje, [class*="fontBodyMedium"] span');
             const infoTexts = Array.from(infoEls)
               .map((el) => el.textContent?.trim())
               .filter(Boolean);
 
-            // Heuristic: last info text is usually an address
             const address = infoTexts.length > 0 ? infoTexts[infoTexts.length - 1] ?? null : null;
 
-            // Phone number pattern
-            const phonePattern = /(\+?[\d\s\-().]{7,20})/;
-            const phoneMatch = infoTexts.find((t) => phonePattern.test(t ?? '') && !t?.includes(','));
+            const phoneMatch = infoTexts.find(
+              (t) => /(\+?[\d\s\-().]{7,20})/.test(t ?? '') && !t?.includes(',')
+            );
 
-            // Website detection (text containing "." but no spaces and not an address)
             const websiteText = infoTexts.find(
-              (t) =>
-                t?.includes('.') &&
-                !t?.includes(' ') &&
-                !t?.match(/^\d/) &&
-                t !== address
+              (t) => t?.includes('.') && !t?.includes(' ') && !t?.match(/^\d/) && t !== address
             );
 
             results.push({
@@ -138,15 +141,15 @@ export async function scrapeGoogleMaps(
       city
     );
 
-    // De-duplicate by business name
+    // De-duplicate by name
     const seen = new Set<string>();
-    const unique = businesses.filter((b) => {
-      if (seen.has(b.businessName)) return false;
-      seen.add(b.businessName);
-      return true;
-    });
-
-    return unique.slice(0, 20);
+    return businesses
+      .filter((b) => {
+        if (seen.has(b.businessName)) return false;
+        seen.add(b.businessName);
+        return true;
+      })
+      .slice(0, 20);
   } finally {
     await browser.close();
   }
