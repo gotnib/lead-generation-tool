@@ -11,10 +11,6 @@ export async function scrapeGoogleMaps(
   let launchArgs: string[];
 
   if (process.env.NODE_ENV === 'production') {
-    // @sparticuz/chromium bundles libnss3 and all other required shared libraries
-    // alongside the binary and sets LD_LIBRARY_PATH automatically via executablePath().
-    // The -min variant only downloads the bare binary and expects system libs to exist
-    // (they don't in Lambda's minimal environment), causing the libnss3.so crash.
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const chromium = require('@sparticuz/chromium');
     executablePath = await chromium.executablePath();
@@ -45,7 +41,6 @@ export async function scrapeGoogleMaps(
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     );
 
-    // Basic bot-detection evasion without puppeteer-extra-plugin-stealth
     await page.evaluateOnNewDocument(() => {
       Object.defineProperty(navigator, 'webdriver', { get: () => false });
       // @ts-expect-error window.chrome is not typed
@@ -55,22 +50,49 @@ export async function scrapeGoogleMaps(
     });
 
     const searchQuery = `${category} in ${city}`;
-    const url = `https://www.google.com/maps/search/${encodeURIComponent(searchQuery)}`;
+    const url = `https://www.google.com/maps/search/${encodeURIComponent(searchQuery)}?hl=en`;
 
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
-    // Dismiss cookie consent if present
-    try {
-      const acceptBtn = await page.$('button[aria-label="Accept all"]');
-      if (acceptBtn) {
-        await acceptBtn.click();
-        await new Promise((r) => setTimeout(r, 1500));
+    // Log page title so it shows up in Vercel function logs for debugging
+    const title = await page.title();
+    console.log('[scraper] page title:', title);
+
+    // Dismiss any consent / cookie interstitial — try every known button variant
+    const consentSelectors = [
+      'button[aria-label="Accept all"]',
+      'button[aria-label="Agree to the use of cookies and other data for the purposes described"]',
+      '#L2AGLb',           // "I agree" on google.com consent page
+      'button.tHlp8d',     // another consent variant
+      'form[action*="consent"] button[type="submit"]',
+    ];
+    for (const sel of consentSelectors) {
+      try {
+        const btn = await page.$(sel);
+        if (btn) {
+          await btn.click();
+          console.log('[scraper] dismissed consent via', sel);
+          await new Promise((r) => setTimeout(r, 2000));
+          break;
+        }
+      } catch {
+        // try next selector
       }
-    } catch {
-      // No consent dialog — continue
     }
 
-    await page.waitForSelector('[role="feed"]', { timeout: 15000 });
+    // Wait for feed — fall back to any place link if the feed role isn't present
+    try {
+      await page.waitForSelector('[role="feed"]', { timeout: 20000 });
+    } catch {
+      // Feed selector missed — check whether we landed on a single result or a blocked page
+      const hasSingleResult = await page.$('a[href*="/maps/place/"]');
+      if (!hasSingleResult) {
+        const bodyText = await page.evaluate(() => document.body.innerText.slice(0, 300));
+        console.log('[scraper] feed not found, body snippet:', bodyText);
+        throw new Error('Google Maps did not return a results list. Try a broader search term.');
+      }
+    }
+
     await new Promise((r) => setTimeout(r, 2000));
 
     // Scroll to load more results
@@ -79,7 +101,7 @@ export async function scrapeGoogleMaps(
         const feed = document.querySelector('[role="feed"]');
         if (feed) feed.scrollBy(0, 800);
       });
-      await new Promise((r) => setTimeout(r, 800));
+      await new Promise((r) => setTimeout(r, 700));
     }
 
     const businesses: ScrapedBusiness[] = await page.evaluate(
@@ -122,7 +144,6 @@ export async function scrapeGoogleMaps(
             const phoneMatch = infoTexts.find(
               (t) => /(\+?[\d\s\-().]{7,20})/.test(t ?? '') && !t?.includes(',')
             );
-
             const websiteText = infoTexts.find(
               (t) =>
                 t?.includes('.') && !t?.includes(' ') && !t?.match(/^\d/) && t !== address
@@ -139,7 +160,7 @@ export async function scrapeGoogleMaps(
               reviewCount,
             });
           } catch {
-            // Skip malformed items
+            // skip malformed item
           }
         });
 
@@ -148,6 +169,8 @@ export async function scrapeGoogleMaps(
       category,
       city
     );
+
+    console.log('[scraper] extracted', businesses.length, 'businesses');
 
     const seen = new Set<string>();
     return businesses
