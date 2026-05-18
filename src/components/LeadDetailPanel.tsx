@@ -377,14 +377,25 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
               <div className="flex gap-1.5">
                 <input type="text" value={form.website} onChange={set('website')} placeholder="example.com" className={inputClass} />
                 {form.website && (
-                  <a href={form.website.startsWith('http') ? form.website : `https://${form.website}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="flex shrink-0 items-center justify-center rounded-lg border border-stone-300 bg-stone-50 px-2.5 text-stone-400 transition hover:border-amber-400 hover:text-amber-600"
-                    title="Open website">
-                    <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M5 1H1v12h12V9M9 1h4v4M5.5 8.5l7-7" />
-                    </svg>
-                  </a>
+                  <>
+                    <a href={form.website.startsWith('http') ? form.website : `https://${form.website}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex shrink-0 items-center justify-center rounded-lg border border-stone-300 bg-stone-50 px-2.5 text-stone-400 transition hover:border-amber-400 hover:text-amber-600"
+                      title="Open website">
+                      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 1H1v12h12V9M9 1h4v4M5.5 8.5l7-7" />
+                      </svg>
+                    </a>
+                    <a href={`https://search.google.com/test/mobile-friendly?url=${encodeURIComponent(form.website.startsWith('http') ? form.website : `https://${form.website}`)}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex shrink-0 items-center justify-center rounded-lg border border-stone-300 bg-stone-50 px-2.5 text-stone-400 transition hover:border-amber-400 hover:text-amber-600"
+                      title="Mobile-friendly test">
+                      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="4" y="1" width="6" height="12" rx="1" />
+                        <path d="M6.5 10.5h1" />
+                      </svg>
+                    </a>
+                  </>
                 )}
               </div>
             </div>
