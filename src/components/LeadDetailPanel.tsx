@@ -251,11 +251,17 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
             <div className="mb-3 flex items-center justify-between">
               <span className={labelClass}>Contact Person</span>
               <button onClick={handleFindContact} disabled={isFindingContact}
-                className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-violet-600 transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none">
+                className="flex min-w-[90px] items-center justify-center gap-1.5 rounded-md border border-violet-200 bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-600 transition hover:bg-violet-100 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none">
                 {isFindingContact ? (
-                  <><span className="h-3 w-3 animate-spin rounded-full border-2 border-violet-300 border-t-violet-500" />Searching…</>
+                  <>
+                    <span className="block h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-violet-300 border-t-violet-600" />
+                    Searching…
+                  </>
                 ) : (
-                  <><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4H13L9.5 7.5l1.5 4L7 9.5 3 11.5l1.5-4L1 5h4.5L7 1z" fill="currentColor" /></svg>Find with AI</>
+                  <>
+                    <svg width="11" height="11" viewBox="0 0 14 14" fill="none" className="shrink-0"><path d="M7 1l1.5 4H13L9.5 7.5l1.5 4L7 9.5 3 11.5l1.5-4L1 5h4.5L7 1z" fill="currentColor" /></svg>
+                    Find with AI
+                  </>
                 )}
               </button>
             </div>
@@ -283,11 +289,17 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
             <div className="mb-3 flex items-center justify-between">
               <span className={labelClass}>Compose Email</span>
               <button onClick={handleGeneratePitch} disabled={isGenerating}
-                className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-amber-600 transition hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none">
+                className="flex min-w-[80px] items-center justify-center gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none">
                 {isGenerating ? (
-                  <><span className="h-3 w-3 animate-spin rounded-full border-2 border-amber-300 border-t-amber-500" />Generating…</>
+                  <>
+                    <span className="block h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-amber-300 border-t-amber-600" />
+                    Generating…
+                  </>
                 ) : (
-                  <><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 4H13L9.5 7.5l1.5 4L7 9.5 3 11.5l1.5-4L1 5h4.5L7 1z" fill="currentColor" /></svg>AI Draft</>
+                  <>
+                    <svg width="11" height="11" viewBox="0 0 14 14" fill="none" className="shrink-0"><path d="M7 1l1.5 4H13L9.5 7.5l1.5 4L7 9.5 3 11.5l1.5-4L1 5h4.5L7 1z" fill="currentColor" /></svg>
+                    AI Draft
+                  </>
                 )}
               </button>
             </div>

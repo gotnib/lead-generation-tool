@@ -385,19 +385,19 @@ export default function PublicPage() {
           {' '}<span className="text-amber-500">actually bring in customers</span>
         </h1>
         <p className="mx-auto mt-5 max-w-lg text-base text-stone-600 sm:text-lg">
-          Most local businesses are invisible online. We fix that — with fast, professional websites that rank on Google and turn visitors into calls.
+          Most local businesses are invisible online. We fix that — with fast, professional websites that make your business look as good as it actually is.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <a href="mailto:support@clearsite.online"
             className="rounded-lg bg-amber-500 px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-600">
-            Get in touch — it's free
+            Get a free website review
           </a>
           <a href="#results"
             className="rounded-lg border border-stone-300 bg-white px-6 py-3.5 text-sm font-semibold text-stone-700 shadow-sm transition-colors hover:border-stone-400 hover:text-stone-900">
             See real results ↓
           </a>
         </div>
-        <p className="mt-4 text-xs text-stone-400">No upfront cost for qualifying businesses · Results typically in 90 days</p>
+        <p className="mt-4 text-xs text-stone-400">No upfront cost for qualifying businesses · Live in 14 days</p>
       </section>
 
       {/* Stats */}
@@ -405,8 +405,8 @@ export default function PublicPage() {
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="grid grid-cols-3 gap-4 text-center">
             {[
-              { value: '3–4×',    label: 'More inbound calls on average' },
-              { value: '90 days', label: 'Typical time to see results' },
+              { value: '3–4×',    label: 'More customer inquiries on average' },
+              { value: '14 days', label: 'Typical time to go live' },
               { value: '$0',      label: 'Upfront for qualifying businesses' },
             ].map((s) => (
               <div key={s.label}>
@@ -427,19 +427,19 @@ export default function PublicPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {[
             {
-              n: '1', title: 'Free audit',
-              body: "We look at where your business stands online — search rankings, reviews, and website — and show you exactly what's costing you customers.",
+              n: '1', title: 'Free website review',
+              body: "Send us your current site — or let us know you don't have one. We'll show you exactly what a redesign would do for your business.",
               icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,
             },
             {
               n: '2', title: 'We build & launch',
-              body: 'A clean, fast, mobile-friendly site goes live within 14 days. Optimized for Google from day one — no templates, no shortcuts.',
+              body: 'A clean, fast, mobile-friendly site goes live within 14 days. Custom design — no templates, no shortcuts, no filler.',
               icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
             },
             {
-              n: '3', title: 'Customers find you',
-              body: 'Rank higher on local searches, get more calls, and stop losing business to competitors who simply have a better website.',
-              icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 11a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
+              n: '3', title: 'Look the part',
+              body: 'A professional site builds instant trust. Stop losing customers to competitors who simply have a better-looking web presence.',
+              icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>,
             },
           ].map((step) => (
             <div key={step.n} className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
@@ -478,16 +478,16 @@ export default function PublicPage() {
       {/* CTA */}
       <section className="px-4 py-16 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-2xl rounded-2xl border border-stone-200 bg-white px-6 py-12 text-center shadow-sm sm:px-12">
-          <h2 className="text-2xl font-bold text-stone-900 sm:text-3xl">Is your business easy to find on Google?</h2>
+          <h2 className="text-2xl font-bold text-stone-900 sm:text-3xl">Does your website represent your business well?</h2>
           <p className="mx-auto mt-4 max-w-md text-stone-600">
-            If you're not sure — or you know the answer is no — let's talk. We'll audit your online presence for free and show you exactly what's holding you back.
+            If the answer is no — or you're not sure — send us your current site. We'll show you what a proper redesign would look like, free of charge.
           </p>
           <a href="mailto:support@clearsite.online"
             className="mt-8 inline-flex items-center gap-2 rounded-lg bg-amber-500 px-8 py-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-600">
-            Get my free audit
+            Get a free website review
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 7h10M7 2l5 5-5 5"/></svg>
           </a>
-          <p className="mt-3 text-xs text-stone-400">No commitment · Typically takes 15 minutes</p>
+          <p className="mt-3 text-xs text-stone-400">No commitment · Free for qualifying businesses</p>
         </div>
       </section>
 

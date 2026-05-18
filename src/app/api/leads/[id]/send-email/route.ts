@@ -68,7 +68,7 @@ function buildHtml(body: string): string {
                         <!-- Name -->
                         <td style="vertical-align:middle;">
                           <span style="display:block;font-size:14px;font-weight:600;color:#1c1917;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">Jason Davis</span>
-                          <span style="font-size:12px;color:#78716c;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">Clearsite</span>
+                          <span style="font-size:12px;color:#78716c;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">Clearsite &middot; </span><a href="https://clearsite.online" style="font-size:12px;color:#d97706;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">clearsite.online</a>
                         </td>
                       </tr>
                     </table>

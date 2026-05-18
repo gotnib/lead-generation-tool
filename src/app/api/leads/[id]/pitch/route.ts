@@ -47,7 +47,7 @@ export async function POST(
     : 'no rating data';
   const websiteLine = lead.website ? `Website: ${lead.website}` : 'No website listed';
 
-  const prompt = `Write a cold outreach email for this business. I offer web design and digital marketing services to local businesses.
+  const prompt = `Write a cold outreach email for this business. I offer website redesign services for local businesses — clean, fast, mobile-friendly sites built from scratch.
 
 Business: ${lead.businessName}
 Type: ${lead.category}
@@ -59,10 +59,10 @@ ${lead.address ? `Address: ${lead.address}` : ''}
 Start the email with: ${greeting}
 
 The email should:
-- Open with one specific observation about their business (their lack of web presence, their review count, something real — not a compliment)
-- Briefly say what I do and what kind of result I've gotten for a similar business
-- End with one clear, low-friction ask (a quick call, a question, whatever fits)
-- Sign off with a real-looking name and casual title
+- Open with one specific observation about their current web presence (no website, outdated site, no reviews, something concrete)
+- Briefly describe what a redesign would do for a business like theirs — be specific, not generic
+- End with a soft, no-pressure invitation: ask a question about their situation, or offer to show them what a redesign could look like — no call scheduling
+- Sign off as Jason Davis, Clearsite
 
 Do not explain what you're doing. Just write the email.`;
 
