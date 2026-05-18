@@ -84,10 +84,12 @@ function buildHtml(body: string): string {
               border-top:1px solid #f0e8d8;
               border-left:1px solid #e8dfd0;border-right:1px solid #e8dfd0;
               border-radius:0 0 6px 6px;">
+              <p style="margin:0 0 6px;font-size:11px;color:#b5a28a;line-height:1.5;">
+                This message was sent by Jason Davis via
+                <span style="color:#d97706;">Clearsite</span> &middot; clearsite.online
+              </p>
               <p style="margin:0;font-size:11px;color:#b5a28a;line-height:1.5;">
-                This message was sent via
-                <span style="color:#d97706;">Clearsite</span>.
-                Reply directly to this email to respond.
+                To stop receiving emails, reply with &ldquo;Unsubscribe&rdquo; in the subject line.
               </p>
             </td>
           </tr>
