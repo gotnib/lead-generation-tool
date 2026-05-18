@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Lead, EmailMessage, LeadLink } from '@/types';
 import { PIPELINE_STAGES } from '@/types';
 
@@ -61,6 +61,8 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile' | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState(false);
+  const [previewScale, setPreviewScale] = useState(1);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (lead) {
@@ -122,6 +124,18 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
         }
       });
   }, [lead?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Scale iframe to container size so the site's media queries fire at the real device width
+  useEffect(() => {
+    const el = previewContainerRef.current;
+    if (!el || !previewMode) return;
+    const refWidth = previewMode === 'mobile' ? 390 : 1280;
+    const update = () => setPreviewScale(el.offsetWidth / refWidth);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [previewMode, form.website]); // form.website used instead of normalizedWebsite (computed later)
 
   if (!lead) return null;
 
@@ -338,52 +352,74 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
           {/* Centred floating device */}
           <div className="relative z-10 flex flex-1 items-center justify-center overflow-hidden p-6">
             {previewMode === 'desktop' ? (
-              /* ── 16:9 desktop card ── */
+              /* ── 16:9 desktop — iframe rendered at 1280×720 then scaled down ── */
               <div
                 className="relative overflow-hidden rounded-xl border border-white/20 shadow-[0_24px_64px_rgba(0,0,0,0.7)]"
                 style={{ width: 'min(calc(100% - 2rem), 900px)', aspectRatio: '16/9' }}
               >
-                {previewLoading && (
-                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-white">
-                    <span className="flex items-center gap-2 text-xs text-stone-400">
-                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-stone-300 border-t-stone-500" />
-                      Loading…
-                    </span>
-                  </div>
-                )}
-                <iframe
-                  key={`desktop-${normalizedWebsite}`}
-                  src={`/api/proxy?url=${encodeURIComponent(normalizedWebsite)}`}
-                  className="h-full w-full bg-white"
-                  onLoad={() => setPreviewLoading(false)}
-                  title="Desktop preview"
-                  sandbox="allow-scripts allow-same-origin allow-forms"
-                />
+                <div ref={previewContainerRef} className="absolute inset-0">
+                  {previewLoading && (
+                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-white">
+                      <span className="flex items-center gap-2 text-xs text-stone-400">
+                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-stone-300 border-t-stone-500" />
+                        Loading…
+                      </span>
+                    </div>
+                  )}
+                  <iframe
+                    key={`desktop-${normalizedWebsite}`}
+                    src={`/api/proxy?url=${encodeURIComponent(normalizedWebsite)}`}
+                    style={{
+                      width: '1280px',
+                      height: '720px',
+                      transform: `scale(${previewScale})`,
+                      transformOrigin: 'top left',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      border: 'none',
+                    }}
+                    onLoad={() => setPreviewLoading(false)}
+                    title="Desktop preview"
+                    sandbox="allow-scripts allow-same-origin allow-forms"
+                  />
+                </div>
               </div>
             ) : (
-              /* ── Phone (390:844) ── width-constrained so aspect ratio is exact */
+              /* ── Phone — iframe rendered at 390×844 then scaled down ── */
               <div
                 className="relative overflow-hidden rounded-[2.8rem] border border-white/20 shadow-[0_24px_64px_rgba(0,0,0,0.7)]"
                 style={{ width: 'min(300px, calc(100% - 4rem))', aspectRatio: '390/844' }}
               >
-                {/* Dynamic island */}
+                {/* Dynamic island — sits above the iframe */}
                 <div className="absolute left-1/2 top-3 z-10 h-[14px] w-[72px] -translate-x-1/2 rounded-full bg-black" />
-                {previewLoading && (
-                  <div className="absolute inset-0 z-20 flex items-center justify-center bg-white">
-                    <span className="flex items-center gap-2 text-xs text-stone-400">
-                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-stone-300 border-t-stone-500" />
-                      Loading…
-                    </span>
-                  </div>
-                )}
-                <iframe
-                  key={`mobile-${normalizedWebsite}`}
-                  src={`/api/proxy?url=${encodeURIComponent(normalizedWebsite)}&mode=mobile`}
-                  className="h-full w-full bg-white pt-5"
-                  onLoad={() => setPreviewLoading(false)}
-                  title="Mobile preview"
-                  sandbox="allow-scripts allow-same-origin allow-forms"
-                />
+                <div ref={previewContainerRef} className="absolute inset-0">
+                  {previewLoading && (
+                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-white">
+                      <span className="flex items-center gap-2 text-xs text-stone-400">
+                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-stone-300 border-t-stone-500" />
+                        Loading…
+                      </span>
+                    </div>
+                  )}
+                  <iframe
+                    key={`mobile-${normalizedWebsite}`}
+                    src={`/api/proxy?url=${encodeURIComponent(normalizedWebsite)}&mode=mobile`}
+                    style={{
+                      width: '390px',
+                      height: '844px',
+                      transform: `scale(${previewScale})`,
+                      transformOrigin: 'top left',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      border: 'none',
+                    }}
+                    onLoad={() => setPreviewLoading(false)}
+                    title="Mobile preview"
+                    sandbox="allow-scripts allow-same-origin allow-forms"
+                  />
+                </div>
                 {/* Home bar */}
                 <div className="absolute bottom-2 left-1/2 z-10 h-[4px] w-[30%] -translate-x-1/2 rounded-full bg-black/25" />
               </div>
