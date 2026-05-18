@@ -64,11 +64,15 @@ clearsite.online
 - Contractions are fine and preferred
 
 9. OUTPUT FORMAT
-Return the email body only.
-No subject line.
-No preamble.
-No explanation of what you wrote.
-Just the email, ready to copy and paste.`;
+Write the email body first — no subject line, no preamble, no explanation.
+Then on its own line write exactly: ---SUBJECTS---
+Then write 3 subject line options following these rules:
+- Under 8 words each
+- No clickbait or false urgency
+- No questions
+- Reference their business name or city in at least one
+- Plain text, no punctuation tricks
+Output: 3 subject lines, numbered, nothing else.`;
 
 export async function POST(
   _req: NextRequest,
@@ -100,17 +104,24 @@ Start the email with: ${greeting}`;
   try {
     const message = await anthropic.messages.create({
       model: 'claude-opus-4-7',
-      max_tokens: 512,
+      max_tokens: 768,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: prompt }],
     });
 
-    const pitchEmail =
-      message.content[0].type === 'text' ? message.content[0].text : '';
+    const raw = message.content[0].type === 'text' ? message.content[0].text : '';
+    const [bodyPart, subjectPart] = raw.split(/\n---SUBJECTS---\n/);
+    const pitchEmail = bodyPart.trim();
+    const subjectLines = (subjectPart ?? '')
+      .trim()
+      .split('\n')
+      .filter((l) => /^\d+\./.test(l))
+      .map((l) => l.replace(/^\d+\.\s*/, '').trim())
+      .filter(Boolean);
 
     await prisma.lead.update({ where: { id }, data: { pitchEmail } });
 
-    return NextResponse.json({ pitchEmail });
+    return NextResponse.json({ pitchEmail, subjectLines });
   } catch (err) {
     console.error('Anthropic error:', err);
     return NextResponse.json(

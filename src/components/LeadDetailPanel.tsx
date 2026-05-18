@@ -36,6 +36,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
   const [emailBody, setEmailBody] = useState('');
   const [emailSubject, setEmailSubject] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [subjectOptions, setSubjectOptions] = useState<string[]>([]);
   const [isFindingContact, setIsFindingContact] = useState(false);
   const [contactError, setContactError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -68,6 +69,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       setSaveSuccess(false);
       setSendError('');
       setSendSuccess(false);
+      setSubjectOptions([]);
     }
   }, [lead]);
 
@@ -151,6 +153,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       setPitchEmail(pitch);
       setEmailSubject('');
       setEmailBody(pitch.trim());
+      setSubjectOptions(Array.isArray(data.subjectLines) ? data.subjectLines : []);
     } catch (err: unknown) {
       setPitchError(err instanceof Error ? err.message : 'Failed to generate email');
     } finally {
@@ -298,6 +301,24 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
             </div>
 
             {pitchError && <p className="mb-2 text-xs text-red-600">{pitchError}</p>}
+
+            {subjectOptions.length > 0 && (
+              <div className="mb-3 rounded-lg border border-stone-200 bg-stone-50 p-3">
+                <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-stone-400">Pick a subject line</p>
+                <div className="flex flex-col gap-1.5">
+                  {subjectOptions.map((s, i) => (
+                    <button key={i} onClick={() => setEmailSubject(s)}
+                      className={`rounded-md border px-3 py-1.5 text-left text-xs transition ${
+                        emailSubject === s
+                          ? 'border-amber-400 bg-amber-50 font-medium text-amber-700'
+                          : 'border-stone-200 bg-white text-stone-700 hover:border-amber-300 hover:text-stone-900'
+                      }`}>
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <input type="text" value={emailSubject} onChange={(e) => setEmailSubject(e.target.value)}
               placeholder="Subject line"
