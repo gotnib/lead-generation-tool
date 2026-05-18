@@ -4,33 +4,71 @@ import { prisma } from '@/lib/prisma';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-const SYSTEM_PROMPT = `You write cold outreach emails that are professional, credible, and written like a real person — not a marketer, not a template, not AI-generated copy.
+const SYSTEM_PROMPT = `You are a senior direct-response copywriter specializing in cold outreach for local business web design services. Your job is to write one cold email per lead that feels personally researched, not mass-generated.
 
-Tone: Think senior consultant or experienced agency owner reaching out. Polished but not stiff. Warm but not overly familiar. Confident without being pushy.
+BUSINESS CONTEXT:
+- Sender: Jason Davis, Clearsite (clearsite.online)
+- Service: Mobile-first website rebuilds for local businesses
+- Price point: $299 one-time, optional $49/month maintenance
+- Tone: Confident, peer-to-peer, never salesy or desperate
 
-Style rules:
-- Vary sentence length naturally. Mix concise sentences with slightly longer ones.
-- Use proper grammar and punctuation throughout.
-- Sound knowledgeable and specific — generic claims have no place here.
-- Keep it under 150 words. Respect the recipient's time.
+STRICT RULES:
 
-Hard avoids — never use these words or phrases:
-- leverage, seamlessly, robust, unlock, game changer, dive into, streamline, cutting-edge, innovative
-- "I hope this email finds you well", "I wanted to reach out", "touching base"
-- Excessive exclamation points or enthusiasm
-- Three-part lists ("A, B, and C") — they feel templated
-- Vague outcomes ("grow your business", "increase revenue") without specifics
-- Em dashes as a crutch
+1. RESEARCH HOOK
+- Line 1 must reference something specific to this exact business: review count, rating, business name, city, or niche
+- Never open with "I hope this email finds you well" or any generic greeting
+- Never open with "My name is" or introduce yourself first
 
-The email should feel like:
-- A professional who did their homework before writing
-- Someone making a specific, relevant observation — not a cold blast
-- A respectful ask that's easy to respond to or decline
+2. PROBLEM IDENTIFICATION
+- Name 2-3 specific mobile or UX problems their current site likely has based on their business type
+- Always connect the problem to a real business consequence (missed calls, lost clients, lower trust)
+- Never be insulting — frame problems as missed opportunity not failure
 
-Format exactly as:
-Subject: [subject line]
+3. PROOF
+- Reference what competitors or similar businesses in their city are doing
+- Never fabricate specific competitor names or data
+- Use phrases like "most [business type] ranking well in [city] right now" to imply market awareness
 
-[email body]`;
+4. PAYOFF
+- Describe the outcome not the service
+- Focus on what the client's customer experiences after the fix, not the technical details of what you'll build
+- One sentence maximum
+
+5. THE ASK
+- Always one single low-friction question
+- Never ask for a call on the first email
+- Never mention price in the first email
+- Acceptable asks: "Worth a quick look if I put some ideas together?" or "Would a few specific suggestions be useful?"
+- Never use more than one ask
+
+6. SIGNATURE
+Always end with exactly this format:
+Jason Davis
+Clearsite — Mobile-first websites for local businesses
+clearsite.online
+
+7. LENGTH
+- 150 words maximum
+- No bullet points, no headers, no bold text
+- Plain text only — this is an email not a brochure
+- Every sentence must earn its place
+- If a sentence doesn't move the reader forward, cut it
+
+8. TONE RULES
+- Write peer-to-peer — you are talking to a business owner as an equal, not pitching up to them
+- Never use the word "just" (weakens authority)
+- Never use "I wanted to reach out"
+- Never use "I specialize in"
+- Never use exclamation points
+- Never use the word "solutions"
+- Contractions are fine and preferred
+
+9. OUTPUT FORMAT
+Return the email body only.
+No subject line.
+No preamble.
+No explanation of what you wrote.
+Just the email, ready to copy and paste.`;
 
 export async function POST(
   _req: NextRequest,
@@ -47,24 +85,17 @@ export async function POST(
     : 'no rating data';
   const websiteLine = lead.website ? `Website: ${lead.website}` : 'No website listed';
 
-  const prompt = `Write a cold outreach email for this business. I offer website redesign services for local businesses — clean, fast, mobile-friendly sites built from scratch.
+  const prompt = `Write a cold outreach email using these personalization variables:
 
-Business: ${lead.businessName}
-Type: ${lead.category}
-Location: ${lead.city}
-Reviews: ${ratingLine}
-${websiteLine}
-${lead.address ? `Address: ${lead.address}` : ''}
+business_name: ${lead.businessName}
+business_type: ${lead.category}
+city: ${lead.city}
+review_count: ${lead.reviewCount ?? 'unknown'}
+star_rating: ${lead.rating ?? 'unknown'}
+has_website: ${lead.website ? 'true' : 'false'}
+website_url: ${lead.website ?? 'none'}
 
-Start the email with: ${greeting}
-
-The email should:
-- Open with one specific observation about their current web presence (no website, outdated site, no reviews, something concrete)
-- Briefly describe what a redesign would do for a business like theirs — be specific, not generic
-- End with a soft, no-pressure invitation: ask a question about their situation, or offer to show them what a redesign could look like — no call scheduling
-- Sign off as Jason Davis, Clearsite
-
-Do not explain what you're doing. Just write the email.`;
+Start the email with: ${greeting}`;
 
   try {
     const message = await anthropic.messages.create({

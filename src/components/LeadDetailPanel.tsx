@@ -61,14 +61,8 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       });
       const pitch = lead.pitchEmail ?? '';
       setPitchEmail(pitch);
-      if (pitch) {
-        const subjectMatch = pitch.match(/^Subject:\s*(.+?)$/m);
-        setEmailSubject(subjectMatch ? subjectMatch[1].trim() : '');
-        setEmailBody(pitch.replace(/^Subject:[^\n]*\n\n?/, '').trim());
-      } else {
-        setEmailSubject('');
-        setEmailBody('');
-      }
+      setEmailSubject('');
+      setEmailBody(pitch.trim());
       setPitchError('');
       setContactError('');
       setSaveSuccess(false);
@@ -155,9 +149,8 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       if (!res.ok) throw new Error(data.error || 'Generation failed');
       const pitch: string = data.pitchEmail;
       setPitchEmail(pitch);
-      const subjectMatch = pitch.match(/^Subject:\s*(.+?)$/m);
-      if (subjectMatch) setEmailSubject(subjectMatch[1].trim());
-      setEmailBody(pitch.replace(/^Subject:[^\n]*\n\n?/, '').trim());
+      setEmailSubject('');
+      setEmailBody(pitch.trim());
     } catch (err: unknown) {
       setPitchError(err instanceof Error ? err.message : 'Failed to generate email');
     } finally {
