@@ -230,16 +230,30 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
 
           {/* Business contact fields */}
           <div className="grid grid-cols-2 gap-4">
-            {([
-              { key: 'phone',   label: 'Phone',   placeholder: '+1 (555) 000-0000', span: 1 },
-              { key: 'website', label: 'Website', placeholder: 'example.com',       span: 1 },
-              { key: 'address', label: 'Address', placeholder: '123 Main St…',      span: 2 },
-            ] as const).map(({ key, label, placeholder, span }) => (
-              <div key={key} className={span === 2 ? 'col-span-2' : ''}>
-                <label className={labelClass}>{label}</label>
-                <input type="text" value={form[key as keyof FormState]} onChange={set(key as keyof FormState)} placeholder={placeholder} className={inputClass} />
+            <div>
+              <label className={labelClass}>Phone</label>
+              <input type="text" value={form.phone} onChange={set('phone')} placeholder="+1 (555) 000-0000" className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Website</label>
+              <div className="flex gap-1.5">
+                <input type="text" value={form.website} onChange={set('website')} placeholder="example.com" className={inputClass} />
+                {form.website && (
+                  <a href={form.website.startsWith('http') ? form.website : `https://${form.website}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex shrink-0 items-center justify-center rounded-lg border border-stone-300 bg-stone-50 px-2.5 text-stone-400 transition hover:border-amber-400 hover:text-amber-600"
+                    title="Open website">
+                    <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 1H1v12h12V9M9 1h4v4M5.5 8.5l7-7" />
+                    </svg>
+                  </a>
+                )}
               </div>
-            ))}
+            </div>
+            <div className="col-span-2">
+              <label className={labelClass}>Address</label>
+              <input type="text" value={form.address} onChange={set('address')} placeholder="123 Main St…" className={inputClass} />
+            </div>
           </div>
 
           {/* Contact person */}
@@ -247,17 +261,17 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
             <div className="mb-3 flex items-center justify-between">
               <span className={labelClass}>Contact Person</span>
               <button onClick={handleFindContact} disabled={isFindingContact}
-                className="flex min-w-[90px] items-center justify-center gap-1.5 rounded-md border border-violet-200 bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-600 transition hover:bg-violet-100 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none">
+                className="min-w-[90px] rounded-md border border-violet-200 bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-600 transition hover:bg-violet-100 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none">
                 {isFindingContact ? (
-                  <>
-                    <span className="block h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-violet-300 border-t-violet-600" />
+                  <span className="flex items-center justify-center gap-1.5">
+                    <span className="h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-violet-300 border-t-violet-600" />
                     Searching…
-                  </>
+                  </span>
                 ) : (
-                  <>
+                  <span className="flex items-center justify-center gap-1.5">
                     <svg width="11" height="11" viewBox="0 0 14 14" fill="none" className="shrink-0"><path d="M7 1l1.5 4H13L9.5 7.5l1.5 4L7 9.5 3 11.5l1.5-4L1 5h4.5L7 1z" fill="currentColor" /></svg>
                     Find with AI
-                  </>
+                  </span>
                 )}
               </button>
             </div>
@@ -285,17 +299,17 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
             <div className="mb-3 flex items-center justify-between">
               <span className={labelClass}>Compose Email</span>
               <button onClick={handleGeneratePitch} disabled={isGenerating}
-                className="flex min-w-[80px] items-center justify-center gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none">
+                className="min-w-[80px] rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none">
                 {isGenerating ? (
-                  <>
-                    <span className="block h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-amber-300 border-t-amber-600" />
+                  <span className="flex items-center justify-center gap-1.5">
+                    <span className="h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-amber-300 border-t-amber-600" />
                     Generating…
-                  </>
+                  </span>
                 ) : (
-                  <>
+                  <span className="flex items-center justify-center gap-1.5">
                     <svg width="11" height="11" viewBox="0 0 14 14" fill="none" className="shrink-0"><path d="M7 1l1.5 4H13L9.5 7.5l1.5 4L7 9.5 3 11.5l1.5-4L1 5h4.5L7 1z" fill="currentColor" /></svg>
                     AI Draft
-                  </>
+                  </span>
                 )}
               </button>
             </div>
