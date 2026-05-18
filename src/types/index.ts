@@ -1,4 +1,4 @@
-export type LeadStatus = 'new' | 'contacted' | 'interested' | 'proposal' | 'closed' | 'lost';
+export type LeadStatus = 'new' | 'contacted' | 'interested' | 'proposal' | 'closed' | 'lost' | 'bad_target';
 
 export interface LeadLink {
   label: string;
@@ -57,12 +57,13 @@ export interface PipelineStage {
 }
 
 export const PIPELINE_STAGES: PipelineStage[] = [
-  { id: 'new',       label: 'New Leads',      color: 'sky',     dotColor: 'bg-sky-400' },
-  { id: 'contacted', label: 'Contacted',       color: 'amber',   dotColor: 'bg-amber-400' },
-  { id: 'interested',label: 'Interested',      color: 'violet',  dotColor: 'bg-violet-400' },
-  { id: 'proposal',  label: 'Proposal Sent',   color: 'orange',  dotColor: 'bg-orange-400' },
-  { id: 'closed',    label: 'Closed',          color: 'emerald', dotColor: 'bg-emerald-400' },
-  { id: 'lost',      label: 'Lost',            color: 'red',     dotColor: 'bg-red-400' },
+  { id: 'new',        label: 'New Leads',      color: 'sky',     dotColor: 'bg-sky-400' },
+  { id: 'contacted',  label: 'Contacted',      color: 'amber',   dotColor: 'bg-amber-400' },
+  { id: 'interested', label: 'Interested',     color: 'violet',  dotColor: 'bg-violet-400' },
+  { id: 'proposal',   label: 'Proposal Sent',  color: 'orange',  dotColor: 'bg-orange-400' },
+  { id: 'closed',     label: 'Closed',         color: 'emerald', dotColor: 'bg-emerald-400' },
+  { id: 'lost',       label: 'Lost',           color: 'red',     dotColor: 'bg-red-400' },
+  { id: 'bad_target', label: 'Bad Target',     color: 'stone',   dotColor: 'bg-stone-400' },
 ];
 
 export const STATUS_BADGE: Record<LeadStatus, string> = {
@@ -72,4 +73,5 @@ export const STATUS_BADGE: Record<LeadStatus, string> = {
   proposal:   'bg-orange-100 text-orange-700 border border-orange-200',
   closed:     'bg-emerald-100 text-emerald-700 border border-emerald-200',
   lost:       'bg-red-100 text-red-700 border border-red-200',
+  bad_target: 'bg-stone-100 text-stone-500 border border-stone-200',
 };

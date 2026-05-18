@@ -340,6 +340,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
                   proposal:   active ? 'border-orange-300 bg-orange-50 text-orange-700': 'border-stone-200 bg-white text-stone-500 hover:border-orange-200 hover:text-orange-600',
                   closed:     active ? 'border-emerald-300 bg-emerald-50 text-emerald-700': 'border-stone-200 bg-white text-stone-500 hover:border-emerald-200 hover:text-emerald-600',
                   lost:       active ? 'border-red-300 bg-red-50 text-red-700'         : 'border-stone-200 bg-white text-stone-500 hover:border-red-200 hover:text-red-600',
+                  bad_target: active ? 'border-stone-400 bg-stone-100 text-stone-600'  : 'border-stone-200 bg-white text-stone-500 hover:border-stone-400 hover:text-stone-600',
                 };
                 return (
                   <button key={s.id} onClick={() => handleStatusChange(s.id)}
