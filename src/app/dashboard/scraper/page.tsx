@@ -79,17 +79,17 @@ export default function ScraperPage() {
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
       {/* Page header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-zinc-100">Find Local Business Leads</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <h1 className="text-2xl font-semibold text-stone-900">Find Local Business Leads</h1>
+        <p className="mt-1 text-sm text-stone-500">
           Searches Google Maps then uses AI to surface only small businesses with weak or no web presence.
         </p>
       </div>
 
       {/* Search form */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 sm:p-8">
+      <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
         <form onSubmit={handleSearch} className="flex flex-col gap-3 sm:flex-row">
           <div className="flex-1">
-            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-zinc-500">
+            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-stone-500">
               Business Type
             </label>
             <input
@@ -98,11 +98,11 @@ export default function ScraperPage() {
               onChange={(e) => setCategory(e.target.value)}
               placeholder="e.g. plumbers, dentists, auto repair"
               required
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+              className="w-full rounded-lg border border-stone-300 bg-stone-50 px-4 py-2.5 text-sm text-stone-900 placeholder-stone-400 transition focus:border-amber-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
             />
           </div>
           <div className="flex-1">
-            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-zinc-500">
+            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-stone-500">
               City
             </label>
             <input
@@ -111,14 +111,14 @@ export default function ScraperPage() {
               onChange={(e) => setCity(e.target.value)}
               placeholder="e.g. Austin TX, Chicago IL"
               required
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 transition focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+              className="w-full rounded-lg border border-stone-300 bg-stone-50 px-4 py-2.5 text-sm text-stone-900 placeholder-stone-400 transition focus:border-amber-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
             />
           </div>
           <div className="flex items-end">
             <button
               type="submit"
               disabled={isLoading}
-              className="flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-blue-500 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:w-auto"
+              className="flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-amber-500 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-amber-500/40 sm:w-auto"
             >
               {isLoading ? (
                 <>
@@ -140,12 +140,12 @@ export default function ScraperPage() {
 
         {isLoading && (
           <div className="mt-6 space-y-2">
-            <div className="flex items-center gap-3 rounded-lg bg-blue-500/10 px-4 py-3 text-sm text-blue-300">
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500/30 border-t-blue-400" />
+            <div className="flex items-center gap-3 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-700">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-amber-300 border-t-amber-500" />
               Searching Google Maps…
             </div>
-            <div className="flex items-center gap-3 rounded-lg bg-violet-500/10 px-4 py-3 text-sm text-violet-300">
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-violet-500/30 border-t-violet-400" />
+            <div className="flex items-center gap-3 rounded-lg bg-violet-50 border border-violet-200 px-4 py-3 text-sm text-violet-700">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-violet-300 border-t-violet-500" />
               AI is qualifying leads — filtering for small businesses with no web presence…
             </div>
           </div>
@@ -154,20 +154,20 @@ export default function ScraperPage() {
 
       {/* Error */}
       {error && (
-        <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
           {error}
         </div>
       )}
 
       {/* Success banner */}
       {addSuccess > 0 && (
-        <div className="mt-4 flex items-center justify-between rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
+        <div className="mt-4 flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
           <span>
             {addSuccess} lead{addSuccess !== 1 ? 's' : ''} added to your pipeline.
           </span>
           <Link
             href="/dashboard"
-            className="ml-4 font-medium underline underline-offset-2 hover:text-emerald-300"
+            className="ml-4 font-medium underline underline-offset-2 hover:text-emerald-800"
           >
             View Dashboard →
           </Link>
@@ -178,24 +178,24 @@ export default function ScraperPage() {
       {results.length > 0 && (
         <div className="mt-6">
           <div className="mb-4 flex items-center justify-between">
-            <p className="flex items-center gap-2 text-sm text-zinc-400">
-              <span className="font-medium text-zinc-200">{results.length}</span> qualified lead{results.length !== 1 ? 's' : ''} found
-              <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/15 px-2 py-0.5 text-[10px] font-medium text-violet-400">
+            <p className="flex items-center gap-2 text-sm text-stone-600">
+              <span className="font-medium text-stone-900">{results.length}</span> qualified lead{results.length !== 1 ? 's' : ''} found
+              <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 border border-violet-200 px-2 py-0.5 text-[10px] font-medium text-violet-700">
                 AI filtered
               </span>
               {selected.size > 0 && (
-                <span className="text-zinc-500">· {selected.size} selected</span>
+                <span className="text-stone-400">· {selected.size} selected</span>
               )}
             </p>
 
             <button
               onClick={handleAddToPipeline}
               disabled={selected.size === 0 || isAdding}
-              className="flex items-center gap-2 rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-zinc-300"
+              className="flex items-center gap-2 rounded-lg bg-stone-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-stone-400"
             >
               {isAdding ? (
                 <>
-                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-400 border-t-zinc-700" />
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                   Adding…
                 </>
               ) : (
@@ -204,31 +204,31 @@ export default function ScraperPage() {
             </button>
           </div>
 
-          <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
+          <div className="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-zinc-800">
+                <tr className="border-b border-stone-200 bg-stone-50">
                   <th className="w-10 px-4 py-3 text-left">
                     <input
                       type="checkbox"
                       checked={selected.size === results.length}
                       onChange={toggleAll}
-                      className="h-4 w-4 rounded border-zinc-600 bg-zinc-800 accent-blue-500"
+                      className="h-4 w-4 rounded border-stone-300 accent-amber-500"
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-zinc-500">Business · Why Chosen</th>
-                  <th className="hidden px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-zinc-500 sm:table-cell">Address</th>
-                  <th className="hidden px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-zinc-500 md:table-cell">Phone</th>
-                  <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-zinc-500">Rating</th>
+                  <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-stone-500">Business · Why Chosen</th>
+                  <th className="hidden px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-stone-500 sm:table-cell">Address</th>
+                  <th className="hidden px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-stone-500 md:table-cell">Phone</th>
+                  <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-stone-500">Rating</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/60">
+              <tbody className="divide-y divide-stone-100">
                 {results.map((biz, i) => (
                   <tr
                     key={i}
                     onClick={() => toggleRow(i)}
-                    className={`cursor-pointer transition-colors hover:bg-zinc-800/40 ${
-                      selected.has(i) ? 'bg-blue-500/5' : ''
+                    className={`cursor-pointer transition-colors hover:bg-stone-50 ${
+                      selected.has(i) ? 'bg-amber-50' : ''
                     }`}
                   >
                     <td className="px-4 py-3.5">
@@ -237,35 +237,35 @@ export default function ScraperPage() {
                         checked={selected.has(i)}
                         onChange={() => toggleRow(i)}
                         onClick={(e) => e.stopPropagation()}
-                        className="h-4 w-4 rounded border-zinc-600 bg-zinc-800 accent-blue-500"
+                        className="h-4 w-4 rounded border-stone-300 accent-amber-500"
                       />
                     </td>
                     <td className="px-4 py-3.5">
-                      <p className="font-medium text-zinc-100">{biz.businessName}</p>
+                      <p className="font-medium text-stone-900">{biz.businessName}</p>
                       {biz.reason && (
-                        <p className="mt-0.5 text-xs text-amber-400/90">{biz.reason}</p>
+                        <p className="mt-0.5 text-xs text-amber-600">{biz.reason}</p>
                       )}
-                      <p className="mt-0.5 text-xs text-zinc-500">{biz.city}</p>
+                      <p className="mt-0.5 text-xs text-stone-400">{biz.city}</p>
                     </td>
                     <td className="hidden px-4 py-3.5 sm:table-cell">
-                      <p className="max-w-xs truncate text-sm text-zinc-400">{biz.address ?? '—'}</p>
+                      <p className="max-w-xs truncate text-sm text-stone-500">{biz.address ?? '—'}</p>
                     </td>
                     <td className="hidden px-4 py-3.5 md:table-cell">
-                      <p className="text-sm text-zinc-400">{biz.phone ?? '—'}</p>
+                      <p className="text-sm text-stone-500">{biz.phone ?? '—'}</p>
                     </td>
                     <td className="px-4 py-3.5">
                       {biz.rating ? (
-                        <span className="flex items-center gap-1 text-sm text-amber-400">
+                        <span className="flex items-center gap-1 text-sm text-amber-500">
                           <svg width="11" height="11" viewBox="0 0 10 10" fill="currentColor">
                             <path d="M5 0l1.12 3.44H9.5L6.69 5.56l1.07 3.44L5 7.06l-2.76 1.94 1.07-3.44L.5 3.44H3.88L5 0z" />
                           </svg>
                           {biz.rating.toFixed(1)}
                           {biz.reviewCount != null && (
-                            <span className="text-zinc-600">({biz.reviewCount})</span>
+                            <span className="text-stone-400">({biz.reviewCount})</span>
                           )}
                         </span>
                       ) : (
-                        <span className="text-sm text-zinc-600">—</span>
+                        <span className="text-sm text-stone-300">—</span>
                       )}
                     </td>
                   </tr>
@@ -278,7 +278,7 @@ export default function ScraperPage() {
 
       {/* Zero-results state */}
       {!isLoading && results.length === 0 && !error && category && city && (
-        <div className="mt-10 flex flex-col items-center text-center text-zinc-500">
+        <div className="mt-10 flex flex-col items-center text-center text-stone-400">
           <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" className="mb-3 opacity-40">
             <circle cx="18" cy="18" r="12" />
             <path d="M28 28l7 7" />

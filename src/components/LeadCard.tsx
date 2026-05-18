@@ -13,11 +13,11 @@ interface Props {
 
 export default function LeadCard({ lead, stage, onClick, onDragStart, onDelete }: Props) {
   return (
-    <div className="relative group rounded-lg border border-zinc-700/60 bg-zinc-800 transition-all hover:border-zinc-600 hover:bg-zinc-700/60 hover:shadow-lg">
+    <div className="relative group rounded-lg border border-stone-200 bg-white shadow-sm transition-all hover:border-stone-300 hover:shadow-md">
       {/* Delete button */}
       <button
         onClick={(e) => { e.stopPropagation(); onDelete(); }}
-        className="absolute right-2 top-2 rounded p-1 text-zinc-600 transition-colors hover:bg-red-500/15 hover:text-red-400 focus:outline-none"
+        className="absolute right-2 top-2 rounded p-1 text-stone-400 transition-colors hover:bg-red-50 hover:text-red-500 focus:outline-none"
         aria-label="Delete lead"
       >
         <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
@@ -32,14 +32,14 @@ export default function LeadCard({ lead, stage, onClick, onDragStart, onDelete }
         onClick={onClick}
         className="cursor-pointer select-none p-3.5 pr-8"
       >
-        <p className="truncate text-sm font-medium text-zinc-100 group-hover:text-white">
+        <p className="truncate text-sm font-medium text-stone-900">
           {lead.businessName}
         </p>
-        <p className="mt-0.5 text-xs text-zinc-500">{lead.city}</p>
+        <p className="mt-0.5 text-xs text-stone-500">{lead.city}</p>
 
         <div className="mt-2.5 flex items-center gap-2">
           {lead.rating && (
-            <span className="flex items-center gap-1 text-xs text-amber-400">
+            <span className="flex items-center gap-1 text-xs text-amber-500">
               <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
                 <path d="M5 0l1.12 3.44H9.5L6.69 5.56l1.07 3.44L5 7.06l-2.76 1.94 1.07-3.44L.5 3.44H3.88L5 0z" />
               </svg>
@@ -52,7 +52,7 @@ export default function LeadCard({ lead, stage, onClick, onDragStart, onDelete }
         </div>
 
         {lead.phone && (
-          <p className="mt-1.5 truncate text-[11px] text-zinc-500">{lead.phone}</p>
+          <p className="mt-1.5 truncate text-[11px] text-stone-400">{lead.phone}</p>
         )}
       </div>
     </div>

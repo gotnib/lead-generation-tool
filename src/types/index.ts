@@ -50,7 +50,7 @@ export interface PipelineStage {
 }
 
 export const PIPELINE_STAGES: PipelineStage[] = [
-  { id: 'new',       label: 'New Leads',      color: 'blue',    dotColor: 'bg-blue-400' },
+  { id: 'new',       label: 'New Leads',      color: 'sky',     dotColor: 'bg-sky-400' },
   { id: 'contacted', label: 'Contacted',       color: 'amber',   dotColor: 'bg-amber-400' },
   { id: 'interested',label: 'Interested',      color: 'violet',  dotColor: 'bg-violet-400' },
   { id: 'proposal',  label: 'Proposal Sent',   color: 'orange',  dotColor: 'bg-orange-400' },
@@ -59,10 +59,10 @@ export const PIPELINE_STAGES: PipelineStage[] = [
 ];
 
 export const STATUS_BADGE: Record<LeadStatus, string> = {
-  new:        'bg-blue-500/15 text-blue-400 border border-blue-500/25',
-  contacted:  'bg-amber-500/15 text-amber-400 border border-amber-500/25',
-  interested: 'bg-violet-500/15 text-violet-400 border border-violet-500/25',
-  proposal:   'bg-orange-500/15 text-orange-400 border border-orange-500/25',
-  closed:     'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25',
-  lost:       'bg-red-500/15 text-red-400 border border-red-500/25',
+  new:        'bg-sky-100 text-sky-700 border border-sky-200',
+  contacted:  'bg-amber-100 text-amber-700 border border-amber-200',
+  interested: 'bg-violet-100 text-violet-700 border border-violet-200',
+  proposal:   'bg-orange-100 text-orange-700 border border-orange-200',
+  closed:     'bg-emerald-100 text-emerald-700 border border-emerald-200',
+  lost:       'bg-red-100 text-red-700 border border-red-200',
 };

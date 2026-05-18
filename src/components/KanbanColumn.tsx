@@ -30,8 +30,8 @@ export default function KanbanColumn({
     <div
       className={`flex w-72 flex-shrink-0 flex-col rounded-xl border transition-all duration-150 ${
         isDragTarget
-          ? 'border-blue-500/40 bg-zinc-800/80 shadow-lg shadow-blue-500/5'
-          : 'border-zinc-800 bg-zinc-900'
+          ? 'border-amber-400 bg-amber-50 shadow-md shadow-amber-500/10'
+          : 'border-stone-200 bg-stone-100'
       }`}
       onDragOver={(e) => e.preventDefault()}
       onDragEnter={onDragEnter}
@@ -39,12 +39,12 @@ export default function KanbanColumn({
       onDrop={onDrop}
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3.5">
+      <div className="flex items-center justify-between border-b border-stone-200 px-4 py-3.5">
         <div className="flex items-center gap-2.5">
           <span className={`h-2 w-2 rounded-full ${stage.dotColor}`} />
-          <span className="text-sm font-medium text-zinc-200">{stage.label}</span>
+          <span className="text-sm font-medium text-stone-800">{stage.label}</span>
         </div>
-        <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] font-medium text-zinc-400">
+        <span className="rounded-full bg-white border border-stone-200 px-2 py-0.5 text-[11px] font-medium text-stone-500">
           {leads.length}
         </span>
       </div>
@@ -63,7 +63,7 @@ export default function KanbanColumn({
         ))}
 
         {leads.length === 0 && (
-          <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-zinc-800 py-8 text-xs text-zinc-600">
+          <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-stone-300 py-8 text-xs text-stone-400">
             Drop leads here
           </div>
         )}
