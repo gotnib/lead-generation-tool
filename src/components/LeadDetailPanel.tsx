@@ -53,7 +53,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
   const [inlineReplyBody, setInlineReplyBody] = useState('');
   const [isSendingReply, setIsSendingReply] = useState(false);
   const [replyError, setReplyError] = useState('');
-  const [isCorrespondenceOpen, setIsCorrespondenceOpen] = useState(false);
+  const [expandedEmailId, setExpandedEmailId] = useState<string | null>(null);
 
   useEffect(() => {
     if (lead) {
@@ -80,7 +80,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       setReplyingToId(null);
       setInlineReplyBody('');
       setReplyError('');
-      setIsCorrespondenceOpen(false);
+      setExpandedEmailId(null);
     }
   }, [lead]);
 
@@ -451,35 +451,22 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
 
           {/* Correspondence thread */}
           <div>
-            <button
-              onClick={() => setIsCorrespondenceOpen((o) => !o)}
-              className="flex w-full items-center justify-between rounded-lg border border-stone-200 bg-stone-50 px-3 py-2.5 transition hover:bg-stone-100 focus:outline-none"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-medium uppercase tracking-wider text-stone-500">Correspondence</span>
-                {emails.length > 0 && (
-                  <span className="rounded-full border border-stone-200 bg-white px-2 py-0.5 text-[11px] text-stone-500">{emails.length}</span>
-                )}
-                {lead.hasUnreadReply && (
-                  <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    </span>
-                    New reply
+            <div className="mb-3 flex items-center gap-2">
+              <span className={labelClass}>Correspondence</span>
+              {emails.length > 0 && (
+                <span className="rounded-full border border-stone-200 bg-stone-100 px-2 py-0.5 text-[11px] text-stone-500">{emails.length}</span>
+              )}
+              {lead.hasUnreadReply && (
+                <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                   </span>
-                )}
-              </div>
-              <svg
-                width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"
-                className={`text-stone-400 transition-transform ${isCorrespondenceOpen ? 'rotate-180' : ''}`}
-              >
-                <path d="M2 4l4 4 4-4" />
-              </svg>
-            </button>
+                  New reply
+                </span>
+              )}
+            </div>
 
-            {isCorrespondenceOpen && (
-            <div className="mt-2">
             {isLoadingEmails ? (
               <div className="flex items-center gap-2 py-4 text-xs text-stone-400">
                 <span className="h-3 w-3 animate-spin rounded-full border-2 border-stone-300 border-t-stone-500" />Loading…
@@ -487,80 +474,103 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
             ) : emails.length === 0 ? (
               <p className="py-4 text-center text-xs text-stone-400">No emails sent or received yet</p>
             ) : (
-              <div className="space-y-2">
-                {emails.map((email) => (
-                  <div key={email.id}>
-                    <div className={`rounded-lg border p-3 ${email.direction === 'sent' ? 'border-amber-200 bg-amber-50' : 'border-emerald-200 bg-emerald-50'}`}>
-                      <div className="mb-1 flex items-center justify-between gap-2">
-                        <span className={`text-[10px] font-medium uppercase tracking-wider ${email.direction === 'sent' ? 'text-amber-600' : 'text-emerald-700'}`}>
-                          {email.direction === 'sent' ? '↑ Sent' : '↓ Received'}
-                        </span>
-                        <div className="flex items-center gap-2">
+              <div className="space-y-1.5">
+                {emails.map((email) => {
+                  const isExpanded = expandedEmailId === email.id;
+                  const isSent = email.direction === 'sent';
+                  return (
+                    <div key={email.id}>
+                      {/* Collapsed header — always visible */}
+                      <button
+                        onClick={() => setExpandedEmailId(isExpanded ? null : email.id)}
+                        className={`flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left transition hover:brightness-95 focus:outline-none ${
+                          isSent ? 'border-amber-200 bg-amber-50' : 'border-emerald-200 bg-emerald-50'
+                        }`}
+                      >
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span className={`shrink-0 text-[10px] font-medium uppercase tracking-wider ${isSent ? 'text-amber-600' : 'text-emerald-700'}`}>
+                            {isSent ? '↑' : '↓'}
+                          </span>
+                          <p className="truncate text-xs font-medium text-stone-800">{email.subject}</p>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2">
                           <span className="text-[11px] text-stone-400">{formatDate(email.createdAt)}</span>
-                          {email.direction === 'received' && (
-                            <button
-                              onClick={() => {
-                                if (replyingToId === email.id) {
-                                  setReplyingToId(null);
-                                  setInlineReplyBody('');
-                                  setReplyError('');
-                                } else {
-                                  setReplyingToId(email.id);
-                                  setInlineReplyBody('');
-                                  setReplyError('');
-                                }
-                              }}
-                              className="rounded px-1.5 py-0.5 text-[10px] font-medium text-emerald-700 transition hover:bg-emerald-100 focus:outline-none"
-                            >
-                              {replyingToId === email.id ? 'Cancel' : 'Reply'}
-                            </button>
+                          <svg
+                            width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"
+                            className={`text-stone-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                          >
+                            <path d="M2 4l4 4 4-4" />
+                          </svg>
+                        </div>
+                      </button>
+
+                      {/* Expanded body */}
+                      {isExpanded && (
+                        <div className={`rounded-b-lg border-x border-b px-3 pb-3 pt-2 ${isSent ? 'border-amber-200 bg-amber-50' : 'border-emerald-200 bg-emerald-50'}`}>
+                          <p className="whitespace-pre-wrap text-xs text-stone-600">{email.body}</p>
+                          {!isSent && (
+                            <div className="mt-2 flex justify-end">
+                              <button
+                                onClick={() => {
+                                  if (replyingToId === email.id) {
+                                    setReplyingToId(null);
+                                    setInlineReplyBody('');
+                                    setReplyError('');
+                                  } else {
+                                    setReplyingToId(email.id);
+                                    setInlineReplyBody('');
+                                    setReplyError('');
+                                  }
+                                }}
+                                className="rounded px-2 py-1 text-[10px] font-medium text-emerald-700 transition hover:bg-emerald-100 focus:outline-none"
+                              >
+                                {replyingToId === email.id ? 'Cancel' : 'Reply'}
+                              </button>
+                            </div>
                           )}
                         </div>
-                      </div>
-                      <p className="truncate text-xs font-medium text-stone-800">{email.subject}</p>
-                      <p className="mt-1 whitespace-pre-wrap text-xs text-stone-600">{email.body}</p>
-                    </div>
+                      )}
 
-                    {replyingToId === email.id && (
-                      <div className="mt-1 rounded-lg border border-emerald-300 bg-white p-3">
-                        <textarea
-                          autoFocus
-                          value={inlineReplyBody}
-                          onChange={(e) => setInlineReplyBody(e.target.value)}
-                          rows={4}
-                          placeholder="Write your reply…"
-                          className="w-full resize-none rounded-md border border-stone-200 bg-stone-50 px-3 py-2 text-xs text-stone-900 placeholder-stone-400 transition focus:border-amber-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
-                        />
-                        {replyError && <p className="mt-1 text-xs text-red-600">{replyError}</p>}
-                        <div className="mt-2 flex items-center justify-between gap-2">
-                          <span className="text-[11px] text-stone-400">
-                            Re: {email.subject.startsWith('Re:') ? email.subject.slice(4).trim() : email.subject}
-                          </span>
-                          <button
-                            onClick={() => handleInlineReply(email)}
-                            disabled={isSendingReply || !inlineReplyBody.trim()}
-                            className="flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none"
-                          >
-                            {isSendingReply ? (
-                              <span className="flex items-center gap-1.5">
-                                <span className="h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                                Sending…
-                              </span>
-                            ) : (
-                              <span className="flex items-center gap-1.5">
-                                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M14 2L2 7l5 2.5L9.5 14 14 2z" /></svg>
-                                Send Reply
-                              </span>
-                            )}
-                          </button>
+                      {/* Inline reply composer */}
+                      {replyingToId === email.id && (
+                        <div className="mt-1 rounded-lg border border-emerald-300 bg-white p-3">
+                          <textarea
+                            autoFocus
+                            value={inlineReplyBody}
+                            onChange={(e) => setInlineReplyBody(e.target.value)}
+                            rows={4}
+                            placeholder="Write your reply…"
+                            className="w-full resize-none rounded-md border border-stone-200 bg-stone-50 px-3 py-2 text-xs text-stone-900 placeholder-stone-400 transition focus:border-amber-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                          />
+                          {replyError && <p className="mt-1 text-xs text-red-600">{replyError}</p>}
+                          <div className="mt-2 flex items-center justify-between gap-2">
+                            <span className="text-[11px] text-stone-400">
+                              Re: {email.subject.startsWith('Re:') ? email.subject.slice(4).trim() : email.subject}
+                            </span>
+                            <button
+                              onClick={() => handleInlineReply(email)}
+                              disabled={isSendingReply || !inlineReplyBody.trim()}
+                              className="flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none"
+                            >
+                              {isSendingReply ? (
+                                <span className="flex items-center gap-1.5">
+                                  <span className="h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                  Sending…
+                                </span>
+                              ) : (
+                                <span className="flex items-center gap-1.5">
+                                  <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M14 2L2 7l5 2.5L9.5 14 14 2z" /></svg>
+                                  Send Reply
+                                </span>
+                              )}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-            )}
-            </div>
             )}
           </div>
 
