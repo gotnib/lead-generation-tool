@@ -50,6 +50,10 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
   const [isLoadingEmails, setIsLoadingEmails] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
+  const [replyingToId, setReplyingToId] = useState<string | null>(null);
+  const [inlineReplyBody, setInlineReplyBody] = useState('');
+  const [isSendingReply, setIsSendingReply] = useState(false);
+  const [replyError, setReplyError] = useState('');
 
   useEffect(() => {
     if (lead) {
@@ -73,6 +77,9 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       setSendSuccess(false);
       setSubjectOptions([]);
       setSyncMessage('');
+      setReplyingToId(null);
+      setInlineReplyBody('');
+      setReplyError('');
     }
   }, [lead]);
 
@@ -229,6 +236,36 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
     } finally {
       setIsSyncing(false);
       setTimeout(() => setSyncMessage(''), 4000);
+    }
+  };
+
+  const handleInlineReply = async (originalEmail: EmailMessage) => {
+    if (!inlineReplyBody.trim()) return;
+    setIsSendingReply(true);
+    setReplyError('');
+    const subject = originalEmail.subject.startsWith('Re:')
+      ? originalEmail.subject
+      : `Re: ${originalEmail.subject}`;
+    try {
+      const res = await fetch(`/api/leads/${lead.id}/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subject, body: inlineReplyBody.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Send failed');
+      setEmails((prev) =>
+        [...prev, { ...data, direction: 'sent' } as EmailMessage].sort(
+          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        )
+      );
+      setReplyingToId(null);
+      setInlineReplyBody('');
+      if (form.status === 'new') handleStatusChange('contacted');
+    } catch (err: unknown) {
+      setReplyError(err instanceof Error ? err.message : 'Failed to send');
+    } finally {
+      setIsSendingReply(false);
     }
   };
 
@@ -466,15 +503,73 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
             ) : (
               <div className="space-y-2">
                 {emails.map((email) => (
-                  <div key={email.id} className={`rounded-lg border p-3 ${email.direction === 'sent' ? 'border-amber-200 bg-amber-50' : 'border-emerald-200 bg-emerald-50'}`}>
-                    <div className="mb-1 flex items-center justify-between gap-2">
-                      <span className={`text-[10px] font-medium uppercase tracking-wider ${email.direction === 'sent' ? 'text-amber-600' : 'text-emerald-700'}`}>
-                        {email.direction === 'sent' ? '↑ Sent' : '↓ Received'}
-                      </span>
-                      <span className="text-[11px] text-stone-400">{formatDate(email.createdAt)}</span>
+                  <div key={email.id}>
+                    <div className={`rounded-lg border p-3 ${email.direction === 'sent' ? 'border-amber-200 bg-amber-50' : 'border-emerald-200 bg-emerald-50'}`}>
+                      <div className="mb-1 flex items-center justify-between gap-2">
+                        <span className={`text-[10px] font-medium uppercase tracking-wider ${email.direction === 'sent' ? 'text-amber-600' : 'text-emerald-700'}`}>
+                          {email.direction === 'sent' ? '↑ Sent' : '↓ Received'}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] text-stone-400">{formatDate(email.createdAt)}</span>
+                          {email.direction === 'received' && (
+                            <button
+                              onClick={() => {
+                                if (replyingToId === email.id) {
+                                  setReplyingToId(null);
+                                  setInlineReplyBody('');
+                                  setReplyError('');
+                                } else {
+                                  setReplyingToId(email.id);
+                                  setInlineReplyBody('');
+                                  setReplyError('');
+                                }
+                              }}
+                              className="rounded px-1.5 py-0.5 text-[10px] font-medium text-emerald-700 transition hover:bg-emerald-100 focus:outline-none"
+                            >
+                              {replyingToId === email.id ? 'Cancel' : 'Reply'}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <p className="truncate text-xs font-medium text-stone-800">{email.subject}</p>
+                      <p className="mt-1 whitespace-pre-wrap text-xs text-stone-600">{email.body}</p>
                     </div>
-                    <p className="truncate text-xs font-medium text-stone-800">{email.subject}</p>
-                    <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-xs text-stone-600">{email.body}</p>
+
+                    {replyingToId === email.id && (
+                      <div className="mt-1 rounded-lg border border-emerald-300 bg-white p-3">
+                        <textarea
+                          autoFocus
+                          value={inlineReplyBody}
+                          onChange={(e) => setInlineReplyBody(e.target.value)}
+                          rows={4}
+                          placeholder="Write your reply…"
+                          className="w-full resize-none rounded-md border border-stone-200 bg-stone-50 px-3 py-2 text-xs text-stone-900 placeholder-stone-400 transition focus:border-amber-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                        />
+                        {replyError && <p className="mt-1 text-xs text-red-600">{replyError}</p>}
+                        <div className="mt-2 flex items-center justify-between gap-2">
+                          <span className="text-[11px] text-stone-400">
+                            Re: {email.subject.startsWith('Re:') ? email.subject.slice(4).trim() : email.subject}
+                          </span>
+                          <button
+                            onClick={() => handleInlineReply(email)}
+                            disabled={isSendingReply || !inlineReplyBody.trim()}
+                            className="flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none"
+                          >
+                            {isSendingReply ? (
+                              <span className="flex items-center gap-1.5">
+                                <span className="h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                Sending…
+                              </span>
+                            ) : (
+                              <span className="flex items-center gap-1.5">
+                                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M14 2L2 7l5 2.5L9.5 14 14 2z" /></svg>
+                                Send Reply
+                              </span>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
