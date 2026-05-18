@@ -48,7 +48,6 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
   const [sendSuccess, setSendSuccess] = useState(false);
   const [emails, setEmails] = useState<EmailMessage[]>([]);
   const [isLoadingEmails, setIsLoadingEmails] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
   const [inlineReplyBody, setInlineReplyBody] = useState('');
@@ -85,12 +84,34 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
 
   useEffect(() => {
     if (!lead) return;
+    const leadId = lead.id;
+    const hasContactEmail = !!lead.contactEmail;
+
     setIsLoadingEmails(true);
-    fetch(`/api/leads/${lead.id}/emails`)
+    fetch(`/api/leads/${leadId}/emails`)
       .then((r) => r.json())
       .then((data) => setEmails(Array.isArray(data) ? data : []))
       .catch(() => setEmails([]))
-      .finally(() => setIsLoadingEmails(false));
+      .finally(() => {
+        setIsLoadingEmails(false);
+        if (hasContactEmail) {
+          fetch(`/api/leads/${leadId}/sync-emails`, { method: 'POST' })
+            .then((r) => r.json())
+            .then((data) => {
+              if (data.newCount > 0 && Array.isArray(data.emails)) {
+                setEmails((prev) => {
+                  const existingIds = new Set(prev.map((e) => e.id));
+                  const fresh = (data.emails as EmailMessage[]).filter((e) => !existingIds.has(e.id));
+                  if (fresh.length === 0) return prev;
+                  return [...prev, ...fresh].sort(
+                    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+                  );
+                });
+              }
+            })
+            .catch(() => {});
+        }
+      });
   }, [lead?.id]);
 
   if (!lead) return null;
@@ -209,33 +230,6 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       setSendError(err instanceof Error ? err.message : 'Failed to send');
     } finally {
       setIsSending(false);
-    }
-  };
-
-  const handleSyncEmails = async () => {
-    setIsSyncing(true);
-    setSyncMessage('');
-    try {
-      const res = await fetch(`/api/leads/${lead.id}/sync-emails`, { method: 'POST' });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Sync failed');
-      if (data.newCount === 0) {
-        setSyncMessage('No new replies found');
-      } else {
-        setEmails((prev) => {
-          const existingIds = new Set(prev.map((e) => e.id));
-          const fresh = (data.emails as EmailMessage[]).filter((e) => !existingIds.has(e.id));
-          return [...prev, ...fresh].sort(
-            (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          );
-        });
-        setSyncMessage(`${data.newCount} new reply${data.newCount === 1 ? '' : 'ies'} synced`);
-      }
-    } catch (err: unknown) {
-      setSyncMessage(err instanceof Error ? err.message : 'Sync failed');
-    } finally {
-      setIsSyncing(false);
-      setTimeout(() => setSyncMessage(''), 4000);
     }
   };
 
@@ -461,38 +455,12 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
 
           {/* Correspondence thread */}
           <div>
-            <div className="mb-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className={labelClass}>Correspondence</span>
-                {emails.length > 0 && (
-                  <span className="rounded-full border border-stone-200 bg-stone-100 px-2 py-0.5 text-[11px] text-stone-500">{emails.length}</span>
-                )}
-              </div>
-              {form.contactEmail && (
-                <button onClick={handleSyncEmails} disabled={isSyncing}
-                  className="flex items-center gap-1.5 rounded-md border border-stone-200 bg-white px-2.5 py-1 text-xs font-medium text-stone-500 transition hover:border-stone-300 hover:text-stone-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none">
-                  {isSyncing ? (
-                    <span className="flex items-center gap-1.5">
-                      <span className="h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-stone-300 border-t-stone-500" />
-                      Syncing…
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1.5">
-                      <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-                        <path d="M1 7a6 6 0 1 0 6-6 6 6 0 0 1-4.5 2M1 1v4h4" />
-                      </svg>
-                      Sync Replies
-                    </span>
-                  )}
-                </button>
+            <div className="mb-3 flex items-center gap-2">
+              <span className={labelClass}>Correspondence</span>
+              {emails.length > 0 && (
+                <span className="rounded-full border border-stone-200 bg-stone-100 px-2 py-0.5 text-[11px] text-stone-500">{emails.length}</span>
               )}
             </div>
-
-            {syncMessage && (
-              <p className={`mb-2 text-xs ${syncMessage.includes('failed') || syncMessage.includes('Failed') ? 'text-red-600' : 'text-stone-500'}`}>
-                {syncMessage}
-              </p>
-            )}
 
             {isLoadingEmails ? (
               <div className="flex items-center gap-2 py-4 text-xs text-stone-400">
