@@ -301,9 +301,85 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
   const inputClass = "w-full rounded-lg border border-stone-300 bg-stone-50 px-3 py-2 text-sm text-stone-900 placeholder-stone-400 transition focus:border-amber-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20";
   const labelClass = "mb-1.5 block text-[11px] font-medium uppercase tracking-wider text-stone-500";
 
+  const normalizedWebsite = form.website
+    ? (form.website.startsWith('http') ? form.website : `https://${form.website}`)
+    : '';
+
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-stone-900/30 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
+      {/* Left pane: iframe browser OR dim backdrop */}
+      {previewMode && normalizedWebsite ? (
+        <div className="fixed inset-y-0 left-0 z-40 flex flex-col bg-stone-950" style={{ right: '32rem' }}>
+          {/* Toolbar */}
+          <div className="flex shrink-0 items-center gap-3 border-b border-stone-800 bg-stone-900 px-4 py-2">
+            <span className="flex-1 truncate text-xs text-stone-400">{normalizedWebsite}</span>
+            <div className="flex gap-1">
+              <button
+                onClick={() => { setPreviewMode('desktop'); setPreviewLoading(true); }}
+                className={`rounded px-2 py-1 text-[11px] font-medium transition focus:outline-none ${previewMode === 'desktop' ? 'bg-stone-700 text-white' : 'text-stone-400 hover:text-white'}`}
+              >Desktop</button>
+              <button
+                onClick={() => { setPreviewMode('mobile'); setPreviewLoading(true); }}
+                className={`rounded px-2 py-1 text-[11px] font-medium transition focus:outline-none ${previewMode === 'mobile' ? 'bg-stone-700 text-white' : 'text-stone-400 hover:text-white'}`}
+              >Mobile</button>
+            </div>
+            <button onClick={() => setPreviewMode(null)} className="rounded p-1 text-stone-400 transition hover:text-white focus:outline-none" aria-label="Close preview">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M2 2l8 8M10 2l-8 8" /></svg>
+            </button>
+          </div>
+
+          {/* iframe content */}
+          {previewMode === 'desktop' ? (
+            <div className="relative flex-1">
+              {previewLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-stone-950">
+                  <span className="flex items-center gap-2 text-xs text-stone-400">
+                    <span className="h-3 w-3 animate-spin rounded-full border-2 border-stone-600 border-t-stone-300" />
+                    Loading…
+                  </span>
+                </div>
+              )}
+              <iframe
+                key={`desktop-${normalizedWebsite}`}
+                src={normalizedWebsite}
+                className="h-full w-full bg-white"
+                onLoad={() => setPreviewLoading(false)}
+                title="Desktop preview"
+              />
+            </div>
+          ) : (
+            <div className="flex flex-1 items-center justify-center overflow-hidden bg-stone-900 p-6">
+              {previewLoading && (
+                <div className="absolute flex items-center gap-2 text-xs text-stone-400">
+                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-stone-600 border-t-stone-300" />
+                  Loading…
+                </div>
+              )}
+              {/* Phone frame */}
+              <div className="relative flex h-full max-h-[812px] flex-col" style={{ width: 'min(390px, calc(100% - 3rem))' }}>
+                <div className="relative flex-1 overflow-hidden rounded-[2.5rem] border-[8px] border-stone-700 bg-white shadow-2xl">
+                  {/* Notch */}
+                  <div className="absolute left-1/2 top-0 z-10 h-5 w-24 -translate-x-1/2 rounded-b-xl bg-stone-700" />
+                  <iframe
+                    key={`mobile-${normalizedWebsite}`}
+                    src={normalizedWebsite}
+                    className="h-full w-full bg-white pt-5"
+                    onLoad={() => setPreviewLoading(false)}
+                    title="Mobile preview"
+                    style={{ width: '390px', transform: 'scale(1)', transformOrigin: 'top left' }}
+                  />
+                </div>
+                {/* Home bar */}
+                <div className="mt-2 flex justify-center">
+                  <div className="h-1 w-24 rounded-full bg-stone-600" />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="fixed inset-0 z-40 bg-stone-900/30 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
+      )}
 
       <aside className="fixed inset-y-0 right-0 z-50 flex w-full max-w-lg flex-col border-l border-stone-200 bg-white shadow-2xl" role="dialog" aria-label="Lead detail">
 
@@ -420,41 +496,6 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
               <input type="text" value={form.address} onChange={set('address')} placeholder="123 Main St…" className={inputClass} />
             </div>
           </div>
-
-          {/* Website preview */}
-          {previewMode && form.website && (() => {
-            const url = encodeURIComponent(form.website.startsWith('http') ? form.website : `https://${form.website}`);
-            const src = `/api/screenshot?url=${url}&mode=${previewMode}`;
-            return (
-              <div className="overflow-hidden rounded-lg border border-stone-200">
-                <div className="flex items-center justify-between border-b border-stone-200 bg-stone-50 px-3 py-1.5">
-                  <span className="text-[10px] font-medium uppercase tracking-wider text-stone-400">
-                    {previewMode === 'desktop' ? 'Desktop' : 'Mobile'} preview
-                  </span>
-                  {previewLoading && (
-                    <span className="flex items-center gap-1.5 text-[11px] text-stone-400">
-                      <span className="h-2.5 w-2.5 animate-spin rounded-full border-2 border-stone-300 border-t-stone-500" />
-                      Capturing…
-                    </span>
-                  )}
-                </div>
-                {previewError ? (
-                  <p className="py-6 text-center text-xs text-stone-400">Could not capture preview</p>
-                ) : (
-                  <div className={`overflow-auto bg-white ${previewMode === 'mobile' ? 'flex justify-center py-2' : ''}`}>
-                    <img
-                      key={src}
-                      src={src}
-                      alt={`${previewMode} preview`}
-                      onLoad={() => setPreviewLoading(false)}
-                      onError={() => { setPreviewLoading(false); setPreviewError(true); }}
-                      className={previewMode === 'mobile' ? 'w-[280px] rounded shadow-sm' : 'w-full'}
-                    />
-                  </div>
-                )}
-              </div>
-            );
-          })()}
 
           {/* Links */}
           <div>
