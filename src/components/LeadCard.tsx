@@ -13,7 +13,7 @@ interface Props {
 
 export default function LeadCard({ lead, stage, onClick, onDragStart, onDelete }: Props) {
   return (
-    <div className="relative group rounded-lg border border-stone-200 bg-white shadow-sm transition-all hover:border-stone-300 hover:shadow-md">
+    <div className={`relative group rounded-lg border bg-white shadow-sm transition-all hover:shadow-md ${lead.hasUnreadReply ? 'border-emerald-400 hover:border-emerald-500' : 'border-stone-200 hover:border-stone-300'}`}>
       {/* Delete button */}
       <button
         onClick={(e) => { e.stopPropagation(); onDelete(); }}
@@ -32,9 +32,17 @@ export default function LeadCard({ lead, stage, onClick, onDragStart, onDelete }
         onClick={onClick}
         className="cursor-pointer select-none p-3.5 pr-8"
       >
-        <p className="truncate text-sm font-medium text-stone-900">
-          {lead.businessName}
-        </p>
+        <div className="flex items-center gap-1.5">
+          <p className="truncate text-sm font-medium text-stone-900">
+            {lead.businessName}
+          </p>
+          {lead.hasUnreadReply && (
+            <span className="relative flex h-2 w-2 flex-shrink-0">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+            </span>
+          )}
+        </div>
         <p className="mt-0.5 text-xs text-stone-500">{lead.city}</p>
 
         <div className="mt-2.5 flex items-center gap-2">

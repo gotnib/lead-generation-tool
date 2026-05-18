@@ -15,6 +15,7 @@ export interface Lead {
   pitchEmail: string | null;
   contactName: string | null;
   contactEmail: string | null;
+  hasUnreadReply: boolean;
   createdAt: string;
   updatedAt: string;
 }

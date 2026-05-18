@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { Lead } from '@/types';
 import StatCard from '@/components/StatCard';
 import KanbanBoard from '@/components/KanbanBoard';
@@ -29,6 +29,26 @@ export default function DashboardClient({ initialLeads }: Props) {
 
   const handleLeadDelete = useCallback((leadId: string) => {
     setLeads((prev) => prev.filter((l) => l.id !== leadId));
+  }, []);
+
+  useEffect(() => {
+    const sync = () => {
+      fetch('/api/sync-all-emails', { method: 'POST' })
+        .then((r) => r.json())
+        .then((data: { updatedIds?: string[] }) => {
+          if (data.updatedIds && data.updatedIds.length > 0) {
+            setLeads((prev) =>
+              prev.map((l) =>
+                data.updatedIds!.includes(l.id) ? { ...l, hasUnreadReply: true } : l
+              )
+            );
+          }
+        })
+        .catch(() => {});
+    };
+    sync();
+    const id = setInterval(sync, 60_000);
+    return () => clearInterval(id);
   }, []);
 
   return (

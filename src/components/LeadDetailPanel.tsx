@@ -53,6 +53,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
   const [inlineReplyBody, setInlineReplyBody] = useState('');
   const [isSendingReply, setIsSendingReply] = useState(false);
   const [replyError, setReplyError] = useState('');
+  const [isCorrespondenceOpen, setIsCorrespondenceOpen] = useState(false);
 
   useEffect(() => {
     if (lead) {
@@ -79,6 +80,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       setReplyingToId(null);
       setInlineReplyBody('');
       setReplyError('');
+      setIsCorrespondenceOpen(false);
     }
   }, [lead]);
 
@@ -94,25 +96,19 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       .catch(() => setEmails([]))
       .finally(() => {
         setIsLoadingEmails(false);
-        if (hasContactEmail) {
-          fetch(`/api/leads/${leadId}/sync-emails`, { method: 'POST' })
+        // Clear unread flag when lead is opened
+        if (lead.hasUnreadReply) {
+          fetch(`/api/leads/${leadId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ hasUnreadReply: false }),
+          })
             .then((r) => r.json())
-            .then((data) => {
-              if (data.newCount > 0 && Array.isArray(data.emails)) {
-                setEmails((prev) => {
-                  const existingIds = new Set(prev.map((e) => e.id));
-                  const fresh = (data.emails as EmailMessage[]).filter((e) => !existingIds.has(e.id));
-                  if (fresh.length === 0) return prev;
-                  return [...prev, ...fresh].sort(
-                    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-                  );
-                });
-              }
-            })
+            .then((updated) => onUpdate(updated))
             .catch(() => {});
         }
       });
-  }, [lead?.id]);
+  }, [lead?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!lead) return null;
 
@@ -455,13 +451,35 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
 
           {/* Correspondence thread */}
           <div>
-            <div className="mb-3 flex items-center gap-2">
-              <span className={labelClass}>Correspondence</span>
-              {emails.length > 0 && (
-                <span className="rounded-full border border-stone-200 bg-stone-100 px-2 py-0.5 text-[11px] text-stone-500">{emails.length}</span>
-              )}
-            </div>
+            <button
+              onClick={() => setIsCorrespondenceOpen((o) => !o)}
+              className="flex w-full items-center justify-between rounded-lg border border-stone-200 bg-stone-50 px-3 py-2.5 transition hover:bg-stone-100 focus:outline-none"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-medium uppercase tracking-wider text-stone-500">Correspondence</span>
+                {emails.length > 0 && (
+                  <span className="rounded-full border border-stone-200 bg-white px-2 py-0.5 text-[11px] text-stone-500">{emails.length}</span>
+                )}
+                {lead.hasUnreadReply && (
+                  <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    </span>
+                    New reply
+                  </span>
+                )}
+              </div>
+              <svg
+                width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"
+                className={`text-stone-400 transition-transform ${isCorrespondenceOpen ? 'rotate-180' : ''}`}
+              >
+                <path d="M2 4l4 4 4-4" />
+              </svg>
+            </button>
 
+            {isCorrespondenceOpen && (
+            <div className="mt-2">
             {isLoadingEmails ? (
               <div className="flex items-center gap-2 py-4 text-xs text-stone-400">
                 <span className="h-3 w-3 animate-spin rounded-full border-2 border-stone-300 border-t-stone-500" />Loading…
@@ -541,6 +559,8 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
                   </div>
                 ))}
               </div>
+            )}
+            </div>
             )}
           </div>
 

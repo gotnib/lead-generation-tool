@@ -22,9 +22,10 @@ model Lead {
   notes        String?
   pitchEmail   String?
   contactName  String?
-  contactEmail String?
-  emails       Email[]
-  createdAt    DateTime @default(now())
+  contactEmail   String?
+  hasUnreadReply Boolean  @default(false)
+  emails         Email[]
+  createdAt      DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 
