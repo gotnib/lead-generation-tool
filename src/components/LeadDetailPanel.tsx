@@ -191,7 +191,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
     }
   };
 
-  const handleGeneratePitch = async (target: 'compose' | 'reply' = 'compose') => {
+  const handleGeneratePitch = async () => {
     setIsGenerating(true);
     setPitchError('');
     try {
@@ -201,14 +201,35 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       const pitch: string = data.pitchEmail;
       setPitchEmail(pitch);
       setSubjectOptions(Array.isArray(data.subjectLines) ? data.subjectLines : []);
-      if (target === 'reply') {
-        setInlineReplyBody(pitch.trim());
-      } else {
-        setEmailSubject('');
-        setEmailBody(pitch.trim());
-      }
+      setEmailSubject('');
+      setEmailBody(pitch.trim());
     } catch (err: unknown) {
       setPitchError(err instanceof Error ? err.message : 'Failed to generate email');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleGenerateReplyDraft = async () => {
+    setIsGenerating(true);
+    setPitchError('');
+    try {
+      const thread = emails.map((e) => ({
+        direction: e.direction,
+        subject: e.subject,
+        body: e.body,
+        createdAt: e.createdAt,
+      }));
+      const res = await fetch(`/api/leads/${lead.id}/reply-draft`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ thread }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Generation failed');
+      setInlineReplyBody(data.draft);
+    } catch (err: unknown) {
+      setPitchError(err instanceof Error ? err.message : 'Failed to generate reply');
     } finally {
       setIsGenerating(false);
     }
@@ -463,7 +484,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
           {form.status === 'new' && <div>
             <div className="mb-3 flex items-center justify-between">
               <span className={labelClass}>Compose Email</span>
-              <button onClick={() => handleGeneratePitch('compose')} disabled={isGenerating}
+              <button onClick={() => handleGeneratePitch()} disabled={isGenerating}
                 className="min-w-[80px] rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none">
                 {isGenerating ? (
                   <span className="flex items-center justify-center gap-1.5">
@@ -612,7 +633,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
                           {/* AI Draft button */}
                           <div className="mb-2 flex items-center justify-between">
                             <span className="text-[10px] font-medium uppercase tracking-wider text-stone-400">Reply</span>
-                            <button onClick={() => handleGeneratePitch('reply')} disabled={isGenerating}
+                            <button onClick={() => handleGenerateReplyDraft()} disabled={isGenerating}
                               className="min-w-[80px] rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none">
                               {isGenerating ? (
                                 <span className="flex items-center justify-center gap-1.5">
