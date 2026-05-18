@@ -369,7 +369,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
                   )}
                   <iframe
                     key={`mobile-${normalizedWebsite}`}
-                    src={`/api/proxy?url=${encodeURIComponent(normalizedWebsite)}`}
+                    src={`/api/proxy?url=${encodeURIComponent(normalizedWebsite)}&mode=mobile`}
                     className="h-full w-full bg-white pt-5"
                     style={{ width: '390px' }}
                     onLoad={() => setPreviewLoading(false)}

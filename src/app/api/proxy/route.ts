@@ -8,8 +8,12 @@ const STRIP_HEADERS = new Set([
   'content-security-policy-report-only',
 ]);
 
+const UA_DESKTOP = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+const UA_MOBILE  = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
+
 export async function GET(req: NextRequest) {
   const rawUrl = req.nextUrl.searchParams.get('url') ?? '';
+  const mobile  = req.nextUrl.searchParams.get('mode') === 'mobile';
 
   let target: URL;
   try {
@@ -24,7 +28,7 @@ export async function GET(req: NextRequest) {
   try {
     const upstream = await fetch(target.toString(), {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent': mobile ? UA_MOBILE : UA_DESKTOP,
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.5',
       },
