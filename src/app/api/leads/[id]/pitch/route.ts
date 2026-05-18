@@ -61,6 +61,7 @@ clearsite.online
 - Never use "I specialize in"
 - Never use exclamation points
 - Never use the word "solutions"
+- Never use hyphens (-) or em dashes (—) anywhere in the email
 - Contractions are fine and preferred
 
 9. OUTPUT FORMAT
