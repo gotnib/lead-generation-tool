@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import type { ScrapedBusiness } from '@/types';
-import Link from 'next/link';
 
 export default function ScraperPage() {
+  const router = useRouter();
   const [category, setCategory] = useState('');
   const [city, setCity] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -12,7 +13,6 @@ export default function ScraperPage() {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [isAdding, setIsAdding] = useState(false);
   const [error, setError] = useState('');
-  const [addSuccess, setAddSuccess] = useState(0);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +20,6 @@ export default function ScraperPage() {
     setError('');
     setResults([]);
     setSelected(new Set());
-    setAddSuccess(0);
 
     try {
       const res = await fetch('/api/scrape', {
@@ -66,8 +65,8 @@ export default function ScraperPage() {
         body: JSON.stringify({ leads: toAdd }),
       });
       if (!res.ok) throw new Error('Failed to add leads');
-      setAddSuccess(toAdd.length);
-      setSelected(new Set());
+      router.refresh();
+      router.push('/dashboard');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to add leads');
     } finally {
@@ -156,21 +155,6 @@ export default function ScraperPage() {
       {error && (
         <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
           {error}
-        </div>
-      )}
-
-      {/* Success banner */}
-      {addSuccess > 0 && (
-        <div className="mt-4 flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          <span>
-            {addSuccess} lead{addSuccess !== 1 ? 's' : ''} added to your pipeline.
-          </span>
-          <Link
-            href="/dashboard"
-            className="ml-4 font-medium underline underline-offset-2 hover:text-emerald-800"
-          >
-            View Dashboard →
-          </Link>
         </div>
       )}
 

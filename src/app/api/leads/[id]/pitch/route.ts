@@ -75,6 +75,27 @@ Then write 3 subject line options following these rules:
 - Plain text, no punctuation tricks
 Output: 3 subject lines, numbered, nothing else.`;
 
+async function skimWebsite(url: string): Promise<string> {
+  try {
+    const base = url.startsWith('http') ? url : `https://${url}`;
+    const res = await fetch(base, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LeadBot/1.0)' },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!res.ok) return '';
+    const html = await res.text();
+    return html
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .trim()
+      .slice(0, 2500);
+  } catch {
+    return '';
+  }
+}
+
 export async function POST(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -85,10 +106,15 @@ export async function POST(
   if (!lead) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
   const greeting = lead.contactName ? `Hi ${lead.contactName.split(' ')[0]},` : 'Hi,';
-  const ratingLine = lead.rating
-    ? `${lead.rating} stars with ${lead.reviewCount ?? 0} reviews`
-    : 'no rating data';
-  const websiteLine = lead.website ? `Website: ${lead.website}` : 'No website listed';
+
+  const websiteSnippet = lead.website ? await skimWebsite(lead.website) : '';
+  const websiteContext = lead.website
+    ? `website_url: ${lead.website}\nwebsite_content_excerpt: ${websiteSnippet || '(could not fetch)'}`
+    : 'has_website: false';
+
+  const notesContext = lead.notes?.trim()
+    ? `\nsales_notes: ${lead.notes.trim()}`
+    : '';
 
   const prompt = `Write a cold outreach email using these personalization variables:
 
@@ -97,8 +123,11 @@ business_type: ${lead.category}
 city: ${lead.city}
 review_count: ${lead.reviewCount ?? 'unknown'}
 star_rating: ${lead.rating ?? 'unknown'}
-has_website: ${lead.website ? 'true' : 'false'}
-website_url: ${lead.website ?? 'none'}
+${websiteContext}${notesContext}
+
+Use the website content excerpt to identify specific problems or missed opportunities on their actual site (slow load indicators, no mobile menu, missing CTA, outdated design language, etc.). Reference something concrete if you can spot it.
+
+If sales_notes are present, factor them into the angle and tone of the email.
 
 Start the email with: ${greeting}`;
 
