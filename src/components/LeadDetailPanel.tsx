@@ -305,7 +305,20 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
         {/* Header */}
         <div className="flex items-start justify-between border-b border-stone-200 bg-stone-50 px-6 py-5">
           <div className="min-w-0 pr-4">
-            <h2 className="truncate text-base font-semibold text-stone-900">{lead.businessName}</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="truncate text-base font-semibold text-stone-900">{lead.businessName}</h2>
+              <a
+                href={`https://www.google.com/search?q=${encodeURIComponent(`${lead.businessName} ${lead.city}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Google this business"
+                className="shrink-0 rounded p-0.5 text-stone-400 transition hover:text-amber-600 focus:outline-none"
+              >
+                <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 1H1v12h12V9M9 1h4v4M5.5 8.5l7-7" />
+                </svg>
+              </a>
+            </div>
             <p className="mt-0.5 text-sm text-stone-500">{lead.category} · {lead.city}</p>
             {lead.rating && (
               <p className="mt-1 flex items-center gap-1 text-xs text-amber-500">
