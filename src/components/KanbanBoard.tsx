@@ -89,7 +89,9 @@ export default function KanbanBoard({ initialLeads, onLeadClick, onLeadUpdate, o
         <KanbanColumn
           key={stage.id}
           stage={stage}
-          leads={leads.filter((l) => l.status === stage.id)}
+          leads={leads
+            .filter((l) => l.status === stage.id)
+            .sort((a, b) => Number(b.hasUnreadReply) - Number(a.hasUnreadReply))}
           isDragTarget={dropTarget === stage.id}
           onLeadClick={(lead) => {
             onLeadClick(lead);
