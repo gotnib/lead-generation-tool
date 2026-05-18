@@ -367,7 +367,7 @@ export default function PublicPage() {
             <a href="#how-it-works" className="transition-colors hover:text-stone-800">How it works</a>
             <a href="#results" className="transition-colors hover:text-stone-800">Results</a>
           </nav>
-          <a href="mailto:hello@clearsite.online"
+          <a href="mailto:support@clearsite.online"
             className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-amber-600">
             Get in touch
           </a>
@@ -388,7 +388,7 @@ export default function PublicPage() {
           Most local businesses are invisible online. We fix that — with fast, professional websites that rank on Google and turn visitors into calls.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <a href="mailto:hello@clearsite.online"
+          <a href="mailto:support@clearsite.online"
             className="rounded-lg bg-amber-500 px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-600">
             Get in touch — it's free
           </a>
@@ -482,7 +482,7 @@ export default function PublicPage() {
           <p className="mx-auto mt-4 max-w-md text-stone-600">
             If you're not sure — or you know the answer is no — let's talk. We'll audit your online presence for free and show you exactly what's holding you back.
           </p>
-          <a href="mailto:hello@clearsite.online"
+          <a href="mailto:support@clearsite.online"
             className="mt-8 inline-flex items-center gap-2 rounded-lg bg-amber-500 px-8 py-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-600">
             Get my free audit
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 7h10M7 2l5 5-5 5"/></svg>
@@ -499,7 +499,7 @@ export default function PublicPage() {
             <div className="flex items-center gap-6 text-xs text-stone-400">
               <Link href="/privacy" className="transition-colors hover:text-stone-600">Privacy Policy</Link>
               <Link href="/terms" className="transition-colors hover:text-stone-600">Terms of Service</Link>
-              <a href="mailto:hello@clearsite.online" className="transition-colors hover:text-stone-600">hello@clearsite.online</a>
+              <a href="mailto:support@clearsite.online" className="transition-colors hover:text-stone-600">support@clearsite.online</a>
             </div>
           </div>
           <div className="mt-4 flex items-center justify-between border-t border-stone-100 pt-4">

@@ -90,7 +90,7 @@ export default function TermsOfService() {
 
           <section>
             <h2 className="text-lg font-semibold text-stone-900 mb-3">11. Contact</h2>
-            <p>Questions about these Terms? Contact us at <a href="mailto:hello@clearsite.online" className="text-amber-600 hover:underline">hello@clearsite.online</a>.</p>
+            <p>Questions about these Terms? Contact us at <a href="mailto:support@clearsite.online" className="text-amber-600 hover:underline">support@clearsite.online</a>.</p>
           </section>
 
         </div>
