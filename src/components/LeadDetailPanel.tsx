@@ -184,7 +184,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
     }
   };
 
-  const handleGeneratePitch = async () => {
+  const handleGeneratePitch = async (target: 'compose' | 'reply' = 'compose') => {
     setIsGenerating(true);
     setPitchError('');
     try {
@@ -193,9 +193,13 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       if (!res.ok) throw new Error(data.error || 'Generation failed');
       const pitch: string = data.pitchEmail;
       setPitchEmail(pitch);
-      setEmailSubject('');
-      setEmailBody(pitch.trim());
       setSubjectOptions(Array.isArray(data.subjectLines) ? data.subjectLines : []);
+      if (target === 'reply') {
+        setInlineReplyBody(pitch.trim());
+      } else {
+        setEmailSubject('');
+        setEmailBody(pitch.trim());
+      }
     } catch (err: unknown) {
       setPitchError(err instanceof Error ? err.message : 'Failed to generate email');
     } finally {
@@ -384,11 +388,11 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
             <textarea value={form.notes} onChange={set('notes')} rows={3} placeholder="Call notes, follow-up reminders, context…" className={`${inputClass} resize-none`} />
           </div>
 
-          {/* Compose + Send */}
-          <div>
+          {/* Compose + Send — only shown for new leads (initial outreach) */}
+          {form.status === 'new' && <div>
             <div className="mb-3 flex items-center justify-between">
               <span className={labelClass}>Compose Email</span>
-              <button onClick={handleGeneratePitch} disabled={isGenerating}
+              <button onClick={() => handleGeneratePitch('compose')} disabled={isGenerating}
                 className="min-w-[80px] rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none">
                 {isGenerating ? (
                   <span className="flex items-center justify-center gap-1.5">
@@ -447,7 +451,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
 
             {sendError && <p className="mt-2 text-xs text-red-600">{sendError}</p>}
             {sendSuccess && <p className="mt-2 text-xs text-emerald-600">Email sent.</p>}
-          </div>
+          </div>}
 
           {/* Correspondence thread */}
           <div>
@@ -534,11 +538,50 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
                       {/* Inline reply composer */}
                       {replyingToId === email.id && (
                         <div className="mt-1 rounded-lg border border-emerald-300 bg-white p-3">
+                          {/* AI Draft button */}
+                          <div className="mb-2 flex items-center justify-between">
+                            <span className="text-[10px] font-medium uppercase tracking-wider text-stone-400">Reply</span>
+                            <button onClick={() => handleGeneratePitch('reply')} disabled={isGenerating}
+                              className="min-w-[80px] rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none">
+                              {isGenerating ? (
+                                <span className="flex items-center justify-center gap-1.5">
+                                  <span className="h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-amber-300 border-t-amber-600" />
+                                  Generating…
+                                </span>
+                              ) : (
+                                <span className="flex items-center justify-center gap-1.5">
+                                  <svg width="11" height="11" viewBox="0 0 14 14" fill="none" className="shrink-0"><path d="M7 1l1.5 4H13L9.5 7.5l1.5 4L7 9.5 3 11.5l1.5-4L1 5h4.5L7 1z" fill="currentColor" /></svg>
+                                  AI Draft
+                                </span>
+                              )}
+                            </button>
+                          </div>
+
+                          {pitchError && <p className="mb-2 text-xs text-red-600">{pitchError}</p>}
+
+                          {subjectOptions.length > 0 && (
+                            <div className="mb-2 rounded-lg border border-stone-200 bg-stone-50 p-2.5">
+                              <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-stone-400">Pick a subject line</p>
+                              <div className="flex flex-col gap-1">
+                                {subjectOptions.map((s, i) => (
+                                  <button key={i} onClick={() => setEmailSubject(s)}
+                                    className={`rounded-md border px-2.5 py-1 text-left text-xs transition ${
+                                      emailSubject === s
+                                        ? 'border-amber-400 bg-amber-50 font-medium text-amber-700'
+                                        : 'border-stone-200 bg-white text-stone-700 hover:border-amber-300 hover:text-stone-900'
+                                    }`}>
+                                    {s}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
                           <textarea
                             autoFocus
                             value={inlineReplyBody}
                             onChange={(e) => setInlineReplyBody(e.target.value)}
-                            rows={4}
+                            rows={6}
                             placeholder="Write your reply…"
                             className="w-full resize-none rounded-md border border-stone-200 bg-stone-50 px-3 py-2 text-xs text-stone-900 placeholder-stone-400 transition focus:border-amber-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                           />
