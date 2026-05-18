@@ -115,6 +115,21 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
     }
   };
 
+  const handleStatusChange = async (newStatus: string) => {
+    setForm((prev) => ({ ...prev, status: newStatus }));
+    try {
+      const res = await fetch(`/api/leads/${lead.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const updated = await res.json();
+      onUpdate(updated);
+    } catch {
+      // save button will retry
+    }
+  };
+
   const handleDelete = async () => {
     if (!confirm(`Delete "${lead.businessName}"? This cannot be undone.`)) return;
     setIsDeleting(true);
@@ -179,6 +194,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       setEmails((prev) => [...prev, { ...data, direction: 'sent' } as EmailMessage]);
       setSendSuccess(true);
       setTimeout(() => setSendSuccess(false), 3000);
+      if (form.status === 'new') handleStatusChange('contacted');
     } catch (err: unknown) {
       setSendError(err instanceof Error ? err.message : 'Failed to send');
     } finally {
@@ -222,10 +238,27 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
 
           {/* Status */}
           <div>
-            <label className={labelClass}>Pipeline Status</label>
-            <select value={form.status} onChange={set('status')} className={inputClass}>
-              {PIPELINE_STAGES.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
-            </select>
+            <label className={labelClass}>Pipeline Stage</label>
+            <div className="flex flex-wrap gap-1.5">
+              {PIPELINE_STAGES.map((s) => {
+                const active = form.status === s.id;
+                const colors: Record<string, string> = {
+                  new:        active ? 'border-sky-300 bg-sky-50 text-sky-700'        : 'border-stone-200 bg-white text-stone-500 hover:border-sky-200 hover:text-sky-600',
+                  contacted:  active ? 'border-amber-300 bg-amber-50 text-amber-700'   : 'border-stone-200 bg-white text-stone-500 hover:border-amber-200 hover:text-amber-600',
+                  interested: active ? 'border-violet-300 bg-violet-50 text-violet-700': 'border-stone-200 bg-white text-stone-500 hover:border-violet-200 hover:text-violet-600',
+                  proposal:   active ? 'border-orange-300 bg-orange-50 text-orange-700': 'border-stone-200 bg-white text-stone-500 hover:border-orange-200 hover:text-orange-600',
+                  closed:     active ? 'border-emerald-300 bg-emerald-50 text-emerald-700': 'border-stone-200 bg-white text-stone-500 hover:border-emerald-200 hover:text-emerald-600',
+                  lost:       active ? 'border-red-300 bg-red-50 text-red-700'         : 'border-stone-200 bg-white text-stone-500 hover:border-red-200 hover:text-red-600',
+                };
+                return (
+                  <button key={s.id} onClick={() => handleStatusChange(s.id)}
+                    className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition focus:outline-none ${colors[s.id]}`}>
+                    <span className={`h-1.5 w-1.5 rounded-full ${s.dotColor}`} />
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Business contact fields */}
