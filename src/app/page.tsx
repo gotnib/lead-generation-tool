@@ -361,7 +361,7 @@ export default function PublicPage() {
       <header className="sticky top-0 z-20 border-b border-stone-200 bg-white/95 backdrop-blur-sm shadow-sm">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center">
-            <img src="/clearsite-logo.png" alt="Clearsite" className="h-9 w-auto" />
+            <img src="/clearsite-logo.png" alt="Clearsite" className="h-11 w-auto" />
           </div>
           <nav className="hidden items-center gap-6 text-sm text-stone-500 sm:flex">
             <a href="#how-it-works" className="transition-colors hover:text-stone-800">How it works</a>

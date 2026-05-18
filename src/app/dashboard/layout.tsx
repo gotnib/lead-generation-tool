@@ -21,9 +21,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <>
       <header className="sticky top-0 z-30 border-b border-stone-200 bg-white shadow-sm">
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6">
-          <div className="flex h-14 items-center justify-between">
+          <div className="flex h-16 items-center justify-between">
             <Link href="/dashboard" className="flex items-center">
-              <img src="/clearsite-logo.png" alt="Clearsite" className="h-8 w-auto" />
+              <img src="/clearsite-logo.png" alt="Clearsite" className="h-11 w-auto" />
             </Link>
 
             <div className="flex items-center gap-1">
