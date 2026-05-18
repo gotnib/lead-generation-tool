@@ -4,6 +4,72 @@ import { prisma } from '@/lib/prisma';
 
 export const maxDuration = 30;
 
+function escapeHtml(str: string) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function buildHtml(body: string): string {
+  const paragraphs = body
+    .split(/\n\n+/)
+    .map((para) => {
+      const inner = para.split('\n').map(escapeHtml).join('<br>');
+      return `<p style="margin:0 0 18px;font-size:15px;line-height:1.75;color:#1c1917;">${inner}</p>`;
+    })
+    .join('');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body style="margin:0;padding:0;background-color:#f5f0e8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+    style="background-color:#f5f0e8;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+          style="max-width:580px;">
+
+          <!-- Amber top bar -->
+          <tr>
+            <td style="background-color:#f59e0b;height:4px;border-radius:6px 6px 0 0;"></td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="background-color:#ffffff;padding:40px 44px 24px;
+              border-left:1px solid #e8dfd0;border-right:1px solid #e8dfd0;">
+              ${paragraphs}
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#faf7f2;padding:18px 44px 24px;
+              border-top:1px solid #f0e8d8;
+              border-left:1px solid #e8dfd0;border-right:1px solid #e8dfd0;
+              border-radius:0 0 6px 6px;">
+              <p style="margin:0;font-size:11px;color:#b5a28a;line-height:1.5;">
+                This message was sent via
+                <span style="color:#d97706;">Clearsite</span>.
+                Reply directly to this email to respond.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -42,6 +108,7 @@ export async function POST(
     to: lead.contactEmail,
     subject: subject.trim(),
     text: body.trim(),
+    html: buildHtml(body.trim()),
   });
 
   const email = await prisma.email.create({
