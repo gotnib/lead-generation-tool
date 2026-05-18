@@ -48,6 +48,8 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
   const [sendSuccess, setSendSuccess] = useState(false);
   const [emails, setEmails] = useState<EmailMessage[]>([]);
   const [isLoadingEmails, setIsLoadingEmails] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState('');
 
   useEffect(() => {
     if (lead) {
@@ -70,6 +72,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       setSendError('');
       setSendSuccess(false);
       setSubjectOptions([]);
+      setSyncMessage('');
     }
   }, [lead]);
 
@@ -199,6 +202,33 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       setSendError(err instanceof Error ? err.message : 'Failed to send');
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const handleSyncEmails = async () => {
+    setIsSyncing(true);
+    setSyncMessage('');
+    try {
+      const res = await fetch(`/api/leads/${lead.id}/sync-emails`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Sync failed');
+      if (data.newCount === 0) {
+        setSyncMessage('No new replies found');
+      } else {
+        setEmails((prev) => {
+          const existingIds = new Set(prev.map((e) => e.id));
+          const fresh = (data.emails as EmailMessage[]).filter((e) => !existingIds.has(e.id));
+          return [...prev, ...fresh].sort(
+            (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        });
+        setSyncMessage(`${data.newCount} new reply${data.newCount === 1 ? '' : 'ies'} synced`);
+      }
+    } catch (err: unknown) {
+      setSyncMessage(err instanceof Error ? err.message : 'Sync failed');
+    } finally {
+      setIsSyncing(false);
+      setTimeout(() => setSyncMessage(''), 4000);
     }
   };
 
@@ -395,11 +425,37 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
           {/* Correspondence thread */}
           <div>
             <div className="mb-3 flex items-center justify-between">
-              <span className={labelClass}>Correspondence</span>
-              {emails.length > 0 && (
-                <span className="rounded-full border border-stone-200 bg-stone-100 px-2 py-0.5 text-[11px] text-stone-500">{emails.length}</span>
+              <div className="flex items-center gap-2">
+                <span className={labelClass}>Correspondence</span>
+                {emails.length > 0 && (
+                  <span className="rounded-full border border-stone-200 bg-stone-100 px-2 py-0.5 text-[11px] text-stone-500">{emails.length}</span>
+                )}
+              </div>
+              {form.contactEmail && (
+                <button onClick={handleSyncEmails} disabled={isSyncing}
+                  className="flex items-center gap-1.5 rounded-md border border-stone-200 bg-white px-2.5 py-1 text-xs font-medium text-stone-500 transition hover:border-stone-300 hover:text-stone-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none">
+                  {isSyncing ? (
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-stone-300 border-t-stone-500" />
+                      Syncing…
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5">
+                      <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                        <path d="M1 7a6 6 0 1 0 6-6 6 6 0 0 1-4.5 2M1 1v4h4" />
+                      </svg>
+                      Sync Replies
+                    </span>
+                  )}
+                </button>
               )}
             </div>
+
+            {syncMessage && (
+              <p className={`mb-2 text-xs ${syncMessage.includes('failed') || syncMessage.includes('Failed') ? 'text-red-600' : 'text-stone-500'}`}>
+                {syncMessage}
+              </p>
+            )}
 
             {isLoadingEmails ? (
               <div className="flex items-center gap-2 py-4 text-xs text-stone-400">
@@ -410,15 +466,15 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
             ) : (
               <div className="space-y-2">
                 {emails.map((email) => (
-                  <div key={email.id} className={`rounded-lg border p-3 ${email.direction === 'sent' ? 'border-amber-200 bg-amber-50' : 'border-stone-200 bg-stone-50'}`}>
+                  <div key={email.id} className={`rounded-lg border p-3 ${email.direction === 'sent' ? 'border-amber-200 bg-amber-50' : 'border-emerald-200 bg-emerald-50'}`}>
                     <div className="mb-1 flex items-center justify-between gap-2">
-                      <span className={`text-[10px] font-medium uppercase tracking-wider ${email.direction === 'sent' ? 'text-amber-600' : 'text-stone-500'}`}>
+                      <span className={`text-[10px] font-medium uppercase tracking-wider ${email.direction === 'sent' ? 'text-amber-600' : 'text-emerald-700'}`}>
                         {email.direction === 'sent' ? '↑ Sent' : '↓ Received'}
                       </span>
                       <span className="text-[11px] text-stone-400">{formatDate(email.createdAt)}</span>
                     </div>
                     <p className="truncate text-xs font-medium text-stone-800">{email.subject}</p>
-                    <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-xs text-stone-500">{email.body}</p>
+                    <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-xs text-stone-600">{email.body}</p>
                   </div>
                 ))}
               </div>
