@@ -124,104 +124,140 @@ function AutoBefore() {
   );
 }
 
-// ── AFTER mockups ─────────────────────────────────────────────────────────────
+// ── AFTER mockups — each a distinct visual identity ───────────────────────────
 
+// Plumber: Light/professional — white bg, blue accent panel, split layout
 function PlumberAfter() {
   return (
-    <div className="h-52 overflow-hidden rounded-xl flex flex-col">
-      <div className="flex items-center justify-between bg-white px-4 py-2 shadow-sm flex-shrink-0">
+    <div className="h-52 overflow-hidden rounded-xl border border-stone-200 flex flex-col">
+      {/* Nav: clean white, phone number prominent */}
+      <div className="flex items-center justify-between bg-white border-b border-stone-100 px-3 py-1.5 flex-shrink-0">
         <div className="flex items-center gap-1.5">
-          <div className="h-4 w-4 rounded bg-slate-700 flex items-center justify-center text-[9px]">🔧</div>
-          <span className="text-[9px] font-bold text-slate-800">MillerPlumbing</span>
+          <div className="h-3.5 w-3.5 rounded bg-blue-700 flex items-center justify-center text-white text-[7px]">🔧</div>
+          <span className="text-[9px] font-bold text-stone-900">MillerPlumbing</span>
         </div>
-        <div className="flex items-center gap-3 text-[7px] text-stone-500">
-          <span>Services</span><span>About</span><span>Reviews</span>
-          <div className="rounded bg-amber-500 px-2 py-0.5 text-white font-semibold">Call Now</div>
+        <div className="flex items-center gap-3 text-[7px] text-stone-400">
+          <span>Services</span><span>Reviews</span>
+          <span className="font-bold text-blue-700">☎ (512) 555-0103</span>
         </div>
       </div>
-      <div className="flex-1 bg-slate-800 px-5 py-4 flex flex-col justify-between">
-        <div>
-          <div className="mb-1 text-[7px] font-semibold uppercase tracking-widest text-amber-400">Austin's Trusted Plumber · Licensed &amp; Insured</div>
-          <div className="mb-1.5 text-[16px] font-bold leading-tight text-white">Fast, Reliable<br />Plumbing — 24/7</div>
-          <div className="mb-3 text-[7px] text-slate-400">Same-day appointments · No surprise fees · Emergency service</div>
-          <div className="flex gap-2">
-            <div className="rounded bg-amber-500 px-3 py-1.5 text-[8px] font-bold text-white">📞 (512) 555-0103</div>
-            <div className="rounded border border-slate-500 px-3 py-1.5 text-[8px] text-slate-300">Get Free Estimate</div>
+      {/* Hero: horizontal split */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left: white content */}
+        <div className="flex-1 bg-white px-4 py-3 flex flex-col justify-between">
+          <div>
+            <div className="text-[6.5px] font-semibold uppercase tracking-widest text-blue-600 mb-1.5">Austin, TX · Licensed &amp; Insured Since 1998</div>
+            <div className="text-[15px] font-bold leading-tight text-stone-900 mb-2">
+              Austin's #1<br/>Trusted Plumber
+            </div>
+            <div className="text-[7px] text-stone-500 mb-2.5">Same-day service · No surprise fees · Emergency calls welcome</div>
+            <div className="inline-block rounded bg-blue-700 px-3 py-1.5 text-[8px] font-bold text-white">
+              Get Free Estimate →
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-amber-400 text-[9px]">★★★★★</span>
+            <span className="text-[6.5px] text-stone-400">51 verified Google reviews</span>
           </div>
         </div>
-        <div>
-          <div className="flex items-center gap-1.5 mb-0.5">
-            <span className="text-amber-400 text-[10px]">★★★★★</span>
-            <span className="text-[7px] text-slate-400">51 verified Google reviews</span>
+        {/* Right: blue accent panel */}
+        <div className="w-[36%] bg-blue-700 flex flex-col items-center justify-center gap-2 px-2 py-3 flex-shrink-0">
+          <div className="text-[6.5px] text-blue-200 uppercase tracking-wider">Available</div>
+          <div className="text-[26px] font-black text-white leading-none">24/7</div>
+          <div className="w-8 h-px bg-blue-500" />
+          <div className="space-y-1 text-center">
+            {['✓ Licensed', '✓ Insured', '✓ Same-day'].map(b => (
+              <div key={b} className="text-[7px] text-blue-100">{b}</div>
+            ))}
           </div>
-          <div className="text-[7px] italic text-slate-500">"Showed up same day, done in 2 hours. Best plumber in Austin." — Karen M.</div>
         </div>
       </div>
     </div>
   );
 }
 
+// Landscaping: Warm organic — cream bg, earthy palette, service tag pills
 function LandscapingAfter() {
   return (
-    <div className="h-52 overflow-hidden rounded-xl flex flex-col">
-      <div className="flex items-center justify-between bg-white px-4 py-2 shadow-sm flex-shrink-0">
+    <div className="h-52 overflow-hidden rounded-xl border border-[#ddd4b8] flex flex-col">
+      {/* Nav: warm cream */}
+      <div className="flex items-center justify-between bg-[#f6f1e7] border-b border-[#e5d9c0] px-3 py-1.5 flex-shrink-0">
         <div className="flex items-center gap-1.5">
-          <div className="h-4 w-4 rounded-full bg-emerald-600 flex items-center justify-center text-[9px]">🌿</div>
-          <span className="text-[9px] font-bold text-emerald-900">GreenLeaf</span>
+          <span className="text-[11px]">🌿</span>
+          <span className="text-[9px] font-serif font-bold text-[#2e4a2f]">GreenLeaf</span>
         </div>
-        <div className="flex items-center gap-3 text-[7px] text-stone-500">
+        <div className="flex items-center gap-2.5 text-[7px] text-[#6b7c5a]">
           <span>Services</span><span>Portfolio</span><span>Reviews</span>
-          <div className="rounded bg-emerald-600 px-2 py-0.5 text-white font-semibold">Free Quote</div>
+          <div className="rounded border border-[#2e4a2f] px-2 py-0.5 text-[#2e4a2f] font-semibold">Quote</div>
         </div>
       </div>
-      <div className="flex-1 bg-emerald-800 px-5 py-4 flex flex-col justify-between">
-        <div>
-          <div className="mb-1 text-[7px] font-semibold uppercase tracking-widest text-emerald-300">Denver's Landscaping Experts · Since 2008</div>
-          <div className="mb-1.5 text-[16px] font-bold leading-tight text-white">Outdoor Spaces<br />Worth Coming Home To</div>
-          <div className="mb-3 text-[7px] text-emerald-300">Lawn care · Hardscaping · Snow removal · Fully licensed</div>
-          <div className="flex gap-2">
-            <div className="rounded bg-white px-3 py-1.5 text-[8px] font-bold text-emerald-800">Get Free Quote →</div>
-            <div className="rounded border border-emerald-600 px-3 py-1.5 text-[8px] text-emerald-300">See Our Work</div>
+      {/* Hero: warm centered */}
+      <div className="flex-1 bg-[#f6f1e7] px-5 py-3 flex flex-col justify-between overflow-hidden">
+        <div className="text-center">
+          <div className="text-[6.5px] font-semibold uppercase tracking-[0.18em] text-[#8a7a50] mb-1.5">Denver, Colorado · Est. 2008</div>
+          <div className="text-[16px] font-serif font-bold leading-tight text-[#1e311f] mb-1.5">
+            Beautiful Spaces,<br/>Every Season
+          </div>
+          <div className="text-[7px] text-[#6b7c5a] mb-2.5">Lawn · Hardscaping · Snow removal · Fully licensed</div>
+          <div className="flex items-center justify-center gap-2">
+            <div className="rounded bg-[#2e4a2f] px-3 py-1.5 text-[7.5px] font-bold text-white">Free Quote →</div>
+            <div className="rounded border border-[#c8b48a] px-2.5 py-1.5 text-[7px] text-[#6b7c5a]">Our Work</div>
           </div>
         </div>
         <div>
-          <div className="flex items-center gap-1.5 mb-0.5">
-            <span className="text-amber-300 text-[10px]">★★★★★</span>
-            <span className="text-[7px] text-emerald-400">63 reviews · Fully booked every summer</span>
+          <div className="flex flex-wrap justify-center gap-1 mb-1.5">
+            {['Lawn Care', 'Hardscaping', 'Sprinklers', 'Snow'].map(tag => (
+              <span key={tag} className="rounded-full bg-[#e8ddc4] px-2 py-0.5 text-[6px] font-medium text-[#5c4e30]">{tag}</span>
+            ))}
           </div>
-          <div className="text-[7px] italic text-emerald-600">"Completely transformed our backyard. Worth every penny." — Dave T.</div>
+          <div className="text-center">
+            <span className="text-amber-500 text-[9px]">★★★★★</span>
+            <span className="text-[6.5px] text-[#8a7a50] ml-1">63 reviews · Fully booked summers</span>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
+// Auto: Bold industrial — black/yellow, large type, stat grid
 function AutoAfter() {
   return (
     <div className="h-52 overflow-hidden rounded-xl flex flex-col">
-      <div className="flex items-center justify-between bg-stone-900 px-4 py-2 flex-shrink-0">
-        <span className="text-[9px] font-bold tracking-wider text-amber-400">EASTSIDE AUTO</span>
-        <div className="flex items-center gap-3 text-[7px] text-stone-400">
-          <span>Services</span><span>About</span><span>Reviews</span>
-          <div className="rounded bg-amber-500 px-2 py-0.5 text-white font-semibold text-[7px]">Book Now</div>
+      {/* Nav: black with yellow CTA */}
+      <div className="flex items-center justify-between bg-black px-3 py-1.5 flex-shrink-0">
+        <div className="flex items-center gap-1.5">
+          <div className="h-4 w-4 rounded-sm bg-yellow-400 flex items-center justify-center">
+            <span className="text-black text-[8px] font-black">E</span>
+          </div>
+          <span className="text-[8px] font-black uppercase tracking-widest text-white">Eastside Auto</span>
+        </div>
+        <div className="flex items-center gap-2.5 text-[7px] text-zinc-400">
+          <span>Services</span><span>Reviews</span>
+          <div className="rounded bg-yellow-400 px-2 py-0.5 text-[7px] font-black text-black uppercase">Book Now</div>
         </div>
       </div>
-      <div className="flex-1 bg-stone-900 border-t border-stone-800 px-5 py-4 flex flex-col justify-between">
+      {/* Hero: dark with yellow accents */}
+      <div className="flex-1 bg-zinc-950 px-4 py-3 flex flex-col justify-between overflow-hidden">
         <div>
-          <div className="mb-1 text-[7px] font-semibold uppercase tracking-widest text-amber-500">Charlotte's #1 Auto Repair · ASE-Certified</div>
-          <div className="mb-1.5 text-[16px] font-bold leading-tight text-white">Expert Service<br />You Can Trust</div>
-          <div className="mb-3 text-[7px] text-stone-400">Honest diagnostics · Fair prices · Mon–Sat 7am–6pm</div>
-          <div className="flex gap-2">
-            <div className="rounded bg-amber-500 px-3 py-1.5 text-[8px] font-bold text-white">Book Appointment</div>
-            <div className="rounded border border-stone-600 px-3 py-1.5 text-[8px] text-stone-400">View Services</div>
+          <div className="inline-block bg-yellow-400 px-2 py-0.5 text-[6.5px] font-black uppercase tracking-wider text-black mb-2">
+            ASE Certified · Charlotte, NC · Est. 2009
+          </div>
+          <div className="text-[22px] font-black uppercase leading-none text-white mb-1.5">
+            Auto<br/>Repair
+          </div>
+          <div className="text-[7px] text-zinc-500 mb-2.5">Honest diagnostics · Fair pricing · No upsells</div>
+          <div className="grid grid-cols-3 gap-1.5">
+            {[['91', '5-star reviews'], ['#1', 'In Charlotte'], ['2 wk', 'Wait list']].map(([v, l]) => (
+              <div key={l} className="rounded bg-zinc-800 py-1.5 text-center">
+                <div className="text-[11px] font-black text-yellow-400 leading-none">{v}</div>
+                <div className="text-[5.5px] text-zinc-500 mt-0.5">{l}</div>
+              </div>
+            ))}
           </div>
         </div>
-        <div>
-          <div className="flex items-center gap-1.5 mb-0.5">
-            <span className="text-amber-400 text-[10px]">★★★★★</span>
-            <span className="text-[7px] text-stone-500">91 reviews · Booked 2 weeks out</span>
-          </div>
-          <div className="text-[7px] italic text-stone-600">"Finally a mechanic I actually trust. Loyal customer for life." — Marcus B.</div>
+        <div className="w-full rounded bg-yellow-400 py-1.5 text-center text-[8px] font-black uppercase text-black">
+          Book Your Appointment →
         </div>
       </div>
     </div>
@@ -276,7 +312,6 @@ function BeforeAfterCard({
 }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
-      {/* Header — stacks on mobile */}
       <div className="border-b border-stone-200 bg-stone-50 px-5 py-4 sm:px-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -288,8 +323,6 @@ function BeforeAfterCard({
           </span>
         </div>
       </div>
-
-      {/* Before / After — stacks on mobile, side-by-side on md+ */}
       <div className="grid grid-cols-1 divide-y divide-stone-200 md:grid-cols-2 md:divide-y-0 md:divide-x">
         <div className="p-5 sm:p-6">
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-red-500">Before</p>
@@ -335,10 +368,8 @@ export default function PublicPage() {
             <a href="#how-it-works" className="transition-colors hover:text-stone-800">How it works</a>
             <a href="#results" className="transition-colors hover:text-stone-800">Results</a>
           </nav>
-          <a
-            href="mailto:you@yourdomain.com"
-            className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-amber-600"
-          >
+          <a href="mailto:you@yourdomain.com"
+            className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-amber-600">
             Get in touch
           </a>
         </div>
@@ -358,16 +389,12 @@ export default function PublicPage() {
           Most local businesses are invisible online. We fix that — with fast, professional websites that rank on Google and turn visitors into calls.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <a
-            href="mailto:you@yourdomain.com"
-            className="rounded-lg bg-amber-500 px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-600"
-          >
+          <a href="mailto:you@yourdomain.com"
+            className="rounded-lg bg-amber-500 px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-600">
             Get in touch — it's free
           </a>
-          <a
-            href="#results"
-            className="rounded-lg border border-stone-300 bg-white px-6 py-3.5 text-sm font-semibold text-stone-700 shadow-sm transition-colors hover:border-stone-400 hover:text-stone-900"
-          >
+          <a href="#results"
+            className="rounded-lg border border-stone-300 bg-white px-6 py-3.5 text-sm font-semibold text-stone-700 shadow-sm transition-colors hover:border-stone-400 hover:text-stone-900">
             See real results ↓
           </a>
         </div>
@@ -379,9 +406,9 @@ export default function PublicPage() {
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="grid grid-cols-3 gap-4 text-center">
             {[
-              { value: '3–4×',     label: 'More inbound calls on average' },
-              { value: '90 days',  label: 'Typical time to see results'   },
-              { value: '$0',       label: 'Upfront for qualifying businesses' },
+              { value: '3–4×',    label: 'More inbound calls on average' },
+              { value: '90 days', label: 'Typical time to see results' },
+              { value: '$0',      label: 'Upfront for qualifying businesses' },
             ].map((s) => (
               <div key={s.label}>
                 <p className="text-xl font-bold text-stone-900 sm:text-3xl">{s.value}</p>
@@ -401,41 +428,24 @@ export default function PublicPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {[
             {
-              n: '1',
-              title: 'Free audit',
+              n: '1', title: 'Free audit',
               body: "We look at where your business stands online — search rankings, reviews, and website — and show you exactly what's costing you customers.",
-              icon: (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                </svg>
-              ),
+              icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,
             },
             {
-              n: '2',
-              title: 'We build & launch',
+              n: '2', title: 'We build & launch',
               body: 'A clean, fast, mobile-friendly site goes live within 14 days. Optimized for Google from day one — no templates, no shortcuts.',
-              icon: (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
-                </svg>
-              ),
+              icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
             },
             {
-              n: '3',
-              title: 'Customers find you',
+              n: '3', title: 'Customers find you',
               body: 'Rank higher on local searches, get more calls, and stop losing business to competitors who simply have a better website.',
-              icon: (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 11a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
-                </svg>
-              ),
+              icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 11a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
             },
           ].map((step) => (
             <div key={step.n} className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-xs font-bold text-amber-600">
-                  {step.n}
-                </div>
+                <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-xs font-bold text-amber-600">{step.n}</div>
                 <div className="h-px flex-1 bg-stone-200" />
               </div>
               <div className="mb-3 text-amber-500">{step.icon}</div>
@@ -473,14 +483,10 @@ export default function PublicPage() {
           <p className="mx-auto mt-4 max-w-md text-stone-600">
             If you're not sure — or you know the answer is no — let's talk. We'll audit your online presence for free and show you exactly what's holding you back.
           </p>
-          <a
-            href="mailto:you@yourdomain.com"
-            className="mt-8 inline-flex items-center gap-2 rounded-lg bg-amber-500 px-8 py-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-600"
-          >
+          <a href="mailto:you@yourdomain.com"
+            className="mt-8 inline-flex items-center gap-2 rounded-lg bg-amber-500 px-8 py-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-600">
             Get my free audit
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M2 7h10M7 2l5 5-5 5"/>
-            </svg>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 7h10M7 2l5 5-5 5"/></svg>
           </a>
           <p className="mt-3 text-xs text-stone-400">No commitment · Typically takes 15 minutes</p>
         </div>
