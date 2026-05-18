@@ -559,24 +559,6 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
 
                           {pitchError && <p className="mb-2 text-xs text-red-600">{pitchError}</p>}
 
-                          {subjectOptions.length > 0 && (
-                            <div className="mb-2 rounded-lg border border-stone-200 bg-stone-50 p-2.5">
-                              <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-stone-400">Pick a subject line</p>
-                              <div className="flex flex-col gap-1">
-                                {subjectOptions.map((s, i) => (
-                                  <button key={i} onClick={() => setEmailSubject(s)}
-                                    className={`rounded-md border px-2.5 py-1 text-left text-xs transition ${
-                                      emailSubject === s
-                                        ? 'border-amber-400 bg-amber-50 font-medium text-amber-700'
-                                        : 'border-stone-200 bg-white text-stone-700 hover:border-amber-300 hover:text-stone-900'
-                                    }`}>
-                                    {s}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
                           <textarea
                             autoFocus
                             value={inlineReplyBody}
