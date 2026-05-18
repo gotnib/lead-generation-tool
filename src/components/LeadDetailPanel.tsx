@@ -311,7 +311,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
 
   return (
     <>
-      {/* Left pane: iframe browser OR dim backdrop */}
+      {/* Left pane: screenshot preview OR dim backdrop */}
       {previewMode && normalizedWebsite ? (
         <div className="fixed inset-y-0 left-0 z-40 flex flex-col bg-stone-950" style={{ right: '32rem' }}>
           {/* Toolbar */}
@@ -319,11 +319,11 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
             <span className="flex-1 truncate text-xs text-stone-400">{normalizedWebsite}</span>
             <div className="flex gap-1">
               <button
-                onClick={() => { setPreviewMode('desktop'); setPreviewLoading(true); }}
+                onClick={() => { setPreviewMode('desktop'); setPreviewLoading(true); setPreviewError(false); }}
                 className={`rounded px-2 py-1 text-[11px] font-medium transition focus:outline-none ${previewMode === 'desktop' ? 'bg-stone-700 text-white' : 'text-stone-400 hover:text-white'}`}
               >Desktop</button>
               <button
-                onClick={() => { setPreviewMode('mobile'); setPreviewLoading(true); }}
+                onClick={() => { setPreviewMode('mobile'); setPreviewLoading(true); setPreviewError(false); }}
                 className={`rounded px-2 py-1 text-[11px] font-medium transition focus:outline-none ${previewMode === 'mobile' ? 'bg-stone-700 text-white' : 'text-stone-400 hover:text-white'}`}
               >Mobile</button>
             </div>
@@ -332,46 +332,61 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
             </button>
           </div>
 
-          {/* iframe content */}
+          {/* Screenshot content */}
           {previewMode === 'desktop' ? (
-            <div className="relative flex-1">
-              {previewLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-stone-950">
-                  <span className="flex items-center gap-2 text-xs text-stone-400">
-                    <span className="h-3 w-3 animate-spin rounded-full border-2 border-stone-600 border-t-stone-300" />
-                    Loading…
-                  </span>
+            <div className="relative flex-1 overflow-auto bg-stone-950">
+              {previewLoading && !previewError && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-stone-600 border-t-stone-300" />
+                  <span className="text-xs text-stone-500">Capturing screenshot…</span>
                 </div>
               )}
-              <iframe
-                key={`desktop-${normalizedWebsite}`}
-                src={normalizedWebsite}
-                className="h-full w-full bg-white"
-                onLoad={() => setPreviewLoading(false)}
-                title="Desktop preview"
-              />
+              {previewError && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-stone-500">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" /></svg>
+                  <span className="text-xs">Screenshot failed</span>
+                </div>
+              )}
+              {!previewError && (
+                <img
+                  key={`desktop-${normalizedWebsite}`}
+                  src={`/api/screenshot?url=${encodeURIComponent(normalizedWebsite)}&mode=desktop`}
+                  alt="Desktop preview"
+                  className={`w-full transition-opacity duration-300 ${previewLoading ? 'opacity-0' : 'opacity-100'}`}
+                  onLoad={() => setPreviewLoading(false)}
+                  onError={() => { setPreviewLoading(false); setPreviewError(true); }}
+                />
+              )}
             </div>
           ) : (
             <div className="flex flex-1 items-center justify-center overflow-hidden bg-stone-900 p-6">
-              {previewLoading && (
-                <div className="absolute flex items-center gap-2 text-xs text-stone-400">
-                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-stone-600 border-t-stone-300" />
-                  Loading…
-                </div>
-              )}
               {/* Phone frame */}
               <div className="relative flex h-full max-h-[812px] flex-col" style={{ width: 'min(390px, calc(100% - 3rem))' }}>
-                <div className="relative flex-1 overflow-hidden rounded-[2.5rem] border-[8px] border-stone-700 bg-white shadow-2xl">
+                <div className="relative flex-1 overflow-hidden rounded-[2.5rem] border-[8px] border-stone-700 bg-stone-950 shadow-2xl">
                   {/* Notch */}
                   <div className="absolute left-1/2 top-0 z-10 h-5 w-24 -translate-x-1/2 rounded-b-xl bg-stone-700" />
-                  <iframe
-                    key={`mobile-${normalizedWebsite}`}
-                    src={normalizedWebsite}
-                    className="h-full w-full bg-white pt-5"
-                    onLoad={() => setPreviewLoading(false)}
-                    title="Mobile preview"
-                    style={{ width: '390px', transform: 'scale(1)', transformOrigin: 'top left' }}
-                  />
+                  {previewLoading && !previewError && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                      <span className="h-5 w-5 animate-spin rounded-full border-2 border-stone-600 border-t-stone-300" />
+                      <span className="text-xs text-stone-500">Capturing screenshot…</span>
+                    </div>
+                  )}
+                  {previewError && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-stone-500">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" /></svg>
+                      <span className="text-xs">Screenshot failed</span>
+                    </div>
+                  )}
+                  {!previewError && (
+                    <img
+                      key={`mobile-${normalizedWebsite}`}
+                      src={`/api/screenshot?url=${encodeURIComponent(normalizedWebsite)}&mode=mobile`}
+                      alt="Mobile preview"
+                      className={`h-full w-full object-cover object-top pt-5 transition-opacity duration-300 ${previewLoading ? 'opacity-0' : 'opacity-100'}`}
+                      onLoad={() => setPreviewLoading(false)}
+                      onError={() => { setPreviewLoading(false); setPreviewError(true); }}
+                    />
+                  )}
                 </div>
                 {/* Home bar */}
                 <div className="mt-2 flex justify-center">
