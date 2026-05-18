@@ -1,190 +1,295 @@
 import Link from 'next/link';
 
-// ── Browser chrome wrapper ────────────────────────────────────────────────────
-function BrowserFrame({ url, children }: { url: string; children: React.ReactNode }) {
+// ── BEFORE mockups ────────────────────────────────────────────────────────────
+
+function PlumberBefore() {
   return (
-    <div className="overflow-hidden rounded-lg border border-stone-200 shadow-sm">
-      <div className="flex items-center gap-2 border-b border-stone-200 bg-stone-100 px-2.5 py-1.5">
-        <div className="flex flex-shrink-0 gap-1">
-          <div className="h-2 w-2 rounded-full bg-red-400" />
-          <div className="h-2 w-2 rounded-full bg-amber-400" />
-          <div className="h-2 w-2 rounded-full bg-emerald-400" />
-        </div>
-        <div className="flex-1 truncate rounded border border-stone-200 bg-white px-2 py-0.5 text-[8px] text-stone-400">
-          {url}
+    <div className="h-52 overflow-hidden rounded-lg border border-stone-200 flex flex-col text-[8px]">
+      {/* Google top bar */}
+      <div className="flex items-center gap-2 bg-white px-3 py-1.5 shadow-sm flex-shrink-0">
+        <span className="font-bold text-[11px] tracking-tight">
+          <span className="text-blue-600">G</span><span className="text-red-500">o</span>
+          <span className="text-amber-400">o</span><span className="text-blue-600">g</span>
+          <span className="text-green-600">l</span><span className="text-red-500">e</span>
+        </span>
+        <div className="flex-1 rounded-full border border-stone-300 bg-stone-50 px-2.5 py-0.5 text-[7px] text-stone-500">
+          miller's plumbing austin tx
         </div>
       </div>
-      <div className="h-44 overflow-hidden">{children}</div>
+      {/* Listing panel */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left: business info */}
+        <div className="w-[52%] border-r border-stone-100 bg-white p-2.5 overflow-hidden">
+          <div className="mb-0.5 text-[10px] font-bold text-stone-900">Miller's Plumbing Co.</div>
+          <div className="mb-1 text-amber-500">★★★★☆ <span className="text-stone-500">6 reviews · Plumber</span></div>
+          <div className="mb-2 text-[7px] text-stone-500">Austin, TX · Open · Closes 5 PM</div>
+          <div className="mb-2 grid grid-cols-3 gap-1">
+            {['Directions','📞 Call','Share'].map(l => (
+              <div key={l} className="rounded border border-stone-200 py-0.5 text-center text-[6.5px] text-blue-600">{l}</div>
+            ))}
+          </div>
+          <div className="space-y-1 border-t border-stone-100 pt-1.5">
+            <div className="flex items-center gap-1 text-stone-400 italic">
+              <span>🌐</span><span>No website</span>
+            </div>
+            <div className="flex items-center gap-1 text-stone-600">
+              <span>📞</span><span>(512) 555-0103</span>
+            </div>
+            <div className="flex items-center gap-1 text-blue-600">
+              <span>👤</span><span>facebook.com/millersplumbing</span>
+            </div>
+          </div>
+        </div>
+        {/* Right: fake map */}
+        <div className="flex-1 relative bg-[#e8e0d8] overflow-hidden">
+          <div className="absolute inset-0 opacity-50">
+            <div className="absolute left-0 right-0 top-[30%] h-px bg-[#c8b89a]" />
+            <div className="absolute left-0 right-0 top-[60%] h-[2px] bg-[#c8b89a]" />
+            <div className="absolute top-0 bottom-0 left-[40%] w-px bg-[#c8b89a]" />
+            <div className="absolute top-0 bottom-0 left-[70%] w-px bg-[#c8b89a]" />
+            <div className="absolute left-0 right-0 top-[45%] h-px bg-[#d4c4aa]" />
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="flex flex-col items-center">
+              <div className="h-4 w-4 rounded-full bg-red-500 border-2 border-white shadow-md" />
+              <div className="h-1.5 w-0.5 bg-red-500" />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-// ── Miller's Plumbing — BEFORE: Google Maps listing, no website ───────────────
-function PlumberBefore() {
-  return (
-    <BrowserFrame url="google.com/maps › miller's plumbing austin">
-      <div className="h-full bg-white p-3 text-[8px]">
-        <div className="mb-2 flex items-start gap-2">
-          <div className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-red-100">
-            <div className="h-2.5 w-2.5 rounded-full bg-red-500" />
-          </div>
-          <div>
-            <div className="text-[10px] font-bold leading-tight text-stone-900">Miller's Plumbing Co.</div>
-            <div className="text-[7px] text-stone-500">Plumber · Austin, TX</div>
-          </div>
-        </div>
-        <div className="mb-2 text-amber-500">
-          ★★★★☆ <span className="text-stone-500">6 reviews</span>
-        </div>
-        <div className="space-y-1.5 border-t border-stone-100 pt-2">
-          <div className="flex items-center gap-1.5 text-stone-400">
-            <span>🌐</span>
-            <span className="italic">No website listed</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-stone-600">
-            <span>📞</span>
-            <span>(512) 555-0103</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-blue-600">
-            <span>👍</span>
-            <span>facebook.com/millersplumbingco</span>
-          </div>
-          <div className="mt-2 rounded bg-stone-100 px-2 py-1 text-center text-[7px] text-stone-400">
-            Directions &nbsp;·&nbsp; Save &nbsp;·&nbsp; Share
-          </div>
-        </div>
-      </div>
-    </BrowserFrame>
-  );
-}
-
-// ── Miller's Plumbing — AFTER: Modern plumbing site ──────────────────────────
-function PlumberAfter() {
-  return (
-    <BrowserFrame url="millersplumbing.com">
-      <div className="flex h-full flex-col justify-between bg-slate-800 p-3">
-        <div>
-          <div className="mb-1 text-[7px] uppercase tracking-widest text-slate-400">Austin, TX · Licensed & Insured</div>
-          <div className="mb-1 text-[14px] font-bold leading-tight text-white">
-            Fast & Reliable<br />Plumbing Service
-          </div>
-          <div className="mb-3 text-[8px] text-amber-400">★★★★★ 51 Reviews on Google</div>
-          <div className="flex gap-1.5">
-            <div className="rounded bg-amber-500 px-2.5 py-1 text-[8px] font-semibold text-white">📞 Call Now</div>
-            <div className="rounded border border-slate-500 px-2.5 py-1 text-[8px] text-slate-300">Get a Quote</div>
-          </div>
-        </div>
-        <div className="text-[7px] text-slate-500">Available 24/7 · No extra charge for weekends</div>
-      </div>
-    </BrowserFrame>
-  );
-}
-
-// ── Green Leaf — BEFORE: Outdated 2013 website ────────────────────────────────
 function LandscapingBefore() {
   return (
-    <BrowserFrame url="greenleaflandscaping.webs.com">
-      <div className="h-full overflow-hidden bg-white text-[8px]">
-        <div className="border-b-4 border-yellow-400 bg-green-700 px-2 py-2 text-center">
-          <div className="text-[11px] font-bold text-yellow-300">🍃 GREEN LEAF LANDSCAPING 🍃</div>
-          <div className="text-[7px] text-yellow-200">Denver Colorado — Serving the Community Since 2008!</div>
-        </div>
-        <div className="p-2">
-          <div className="mb-1 cursor-pointer text-[9px] font-bold text-blue-700 underline">
-            ➤ CLICK HERE FOR OUR SERVICES!!!
-          </div>
-          <div className="mb-2 text-[7px] text-stone-600">
-            Hours: Mon–Fri 8am to 5pm<br />
-            Phone: (303) 555-0177 — Call Us!
-          </div>
-          <div className="rounded border border-stone-300 bg-stone-100 p-2 text-center">
-            <div className="mb-0.5 text-[18px]">🖼️</div>
-            <div className="text-[6px] text-stone-400">Image loading... please wait</div>
-            <div className="text-[6px] text-stone-400">Best viewed in Internet Explorer 8</div>
-          </div>
-          <div className="mt-1.5 text-center text-[6px] text-stone-400">
-            © 2013 Green Leaf Landscaping · All Rights Reserved
-          </div>
-        </div>
+    <div className="h-52 overflow-hidden rounded-lg border border-stone-200 flex flex-col text-[8px]">
+      {/* Old site header */}
+      <div className="bg-green-800 px-3 py-2 text-center flex-shrink-0">
+        <div className="text-[12px] font-bold text-yellow-300 leading-tight">🌿 GREEN LEAF LANDSCAPING 🌿</div>
+        <div className="text-[7px] text-yellow-200">Denver, Colorado · Quality You Can Count On!</div>
       </div>
-    </BrowserFrame>
-  );
-}
-
-// ── Green Leaf — AFTER: Modern landscaping site ───────────────────────────────
-function LandscapingAfter() {
-  return (
-    <BrowserFrame url="greenleafdenver.com">
-      <div className="flex h-full flex-col justify-between bg-emerald-800 p-3">
-        <div>
-          <div className="mb-1 text-[7px] uppercase tracking-widest text-emerald-300">Denver's Premier Landscaping Co.</div>
-          <div className="mb-1 text-[14px] font-bold leading-tight text-white">
-            Beautiful Yards,<br />Every Season
-          </div>
-          <div className="mb-3 text-[8px] text-amber-300">★★★★★ 63 Reviews · Fully Booked Summers</div>
-          <div className="flex gap-1.5">
-            <div className="rounded bg-white px-2.5 py-1 text-[8px] font-semibold text-emerald-800">Get Free Quote →</div>
-            <div className="rounded border border-emerald-600 px-2.5 py-1 text-[8px] text-emerald-300">Our Work</div>
-          </div>
-        </div>
-        <div className="text-[7px] text-emerald-500">Licensed · Insured · 15 Years Experience</div>
+      {/* Old nav */}
+      <div className="bg-green-600 py-1 text-center text-[7px] text-white flex-shrink-0">
+        <span className="underline">HOME</span>
+        {' | '}<span className="text-yellow-300 underline cursor-pointer">SERVICES</span>
+        {' | '}<span className="underline">GALLERY</span>
+        {' | '}<span className="underline">CONTACT US</span>
       </div>
-    </BrowserFrame>
-  );
-}
-
-// ── Eastside Auto — BEFORE: Facebook business page ───────────────────────────
-function AutoBefore() {
-  return (
-    <BrowserFrame url="facebook.com › Eastside Auto Care">
-      <div className="h-full overflow-hidden bg-white text-[8px]">
-        {/* Cover photo */}
-        <div className="relative h-14 bg-gradient-to-r from-stone-400 to-stone-500">
-          <div className="absolute bottom-0 left-3 translate-y-1/2">
-            <div className="flex h-9 w-9 items-center justify-center rounded border-2 border-white bg-blue-900 text-[12px] font-bold text-white">
-              E
+      {/* Old content */}
+      <div className="flex-1 bg-[#f5f0e8] overflow-hidden p-2.5">
+        <div className="mb-1.5 text-center text-[7px] font-bold text-green-900 underline">
+          ★ Welcome to Our Website! Click Here to Learn More ★
+        </div>
+        <div className="flex gap-2">
+          <div className="flex-1 text-[7px] text-stone-700">
+            <div className="mb-1">We are a <span className="font-bold">family owned</span> landscaping buisness serving the Denver area since 2008!!!</div>
+            <div className="text-green-800 font-bold mb-0.5">Our Services:</div>
+            {['Lawn Mowing', 'Tree Trimming', 'Sprinkler Repair', 'Snow Removal'].map(s => (
+              <div key={s} className="text-[6.5px]">• {s}</div>
+            ))}
+          </div>
+          <div className="w-16 flex-shrink-0">
+            <div className="rounded border border-stone-300 bg-stone-200 p-1.5 text-center">
+              <div className="text-[18px] leading-none mb-0.5">🖼️</div>
+              <div className="text-[5.5px] text-stone-400">photo loading…</div>
             </div>
           </div>
         </div>
-        {/* Page info */}
-        <div className="px-3 pt-6">
-          <div className="text-[10px] font-bold text-stone-900">Eastside Auto Care</div>
-          <div className="text-[7px] text-stone-500">Automotive Service · Charlotte, NC · 19 ratings</div>
-          <div className="mt-1.5 flex gap-1">
-            <span className="rounded bg-blue-600 px-1.5 py-0.5 text-[7px] font-medium text-white">👍 Like</span>
-            <span className="rounded border border-stone-300 px-1.5 py-0.5 text-[7px] text-stone-600">Follow</span>
-            <span className="rounded border border-stone-300 px-1.5 py-0.5 text-[7px] text-stone-600">Message</span>
-          </div>
-          <div className="mt-2 rounded border border-stone-200 bg-stone-50 p-1.5 text-[7px] italic text-stone-400">
-            No posts this week — last post was 4 months ago
-          </div>
+        <div className="mt-2 border-t border-stone-400 pt-1 text-center text-[6px] text-stone-500">
+          📞 (303) 555-0177 &nbsp;|&nbsp; Last Updated: March 2014 &nbsp;|&nbsp; Visitors: 4,892
+        </div>
+        <div className="mt-0.5 text-center text-[5.5px] text-stone-400 italic">
+          Best viewed in Internet Explorer 8 · 800×600 resolution recommended
         </div>
       </div>
-    </BrowserFrame>
+    </div>
   );
 }
 
-// ── Eastside Auto — AFTER: Professional auto care site ───────────────────────
-function AutoAfter() {
+function AutoBefore() {
   return (
-    <BrowserFrame url="eastsideautocare.com">
-      <div className="flex h-full flex-col justify-between bg-stone-900 p-3">
+    <div className="h-52 overflow-hidden rounded-lg border border-stone-200 flex flex-col text-[8px] bg-[#f0f2f5]">
+      {/* Facebook top bar */}
+      <div className="flex items-center gap-2 bg-[#1877f2] px-3 py-1.5 flex-shrink-0">
+        <span className="text-white font-black text-[14px] leading-none">f</span>
+        <div className="flex-1 rounded-full bg-white/20 px-2 py-0.5 text-[7px] text-white/70">🔍 Search Facebook</div>
+        <div className="text-white/70 text-[9px]">⋯</div>
+      </div>
+      {/* Cover photo */}
+      <div className="relative h-14 bg-stone-500 flex-shrink-0">
+        <div className="absolute inset-0 bg-stone-600 opacity-60" />
+        <div className="absolute bottom-0 left-3 translate-y-1/2 flex items-end gap-2">
+          <div className="h-9 w-9 rounded-lg border-2 border-white bg-stone-800 flex items-center justify-center text-white font-black text-[13px]">E</div>
+        </div>
+      </div>
+      {/* Name + actions */}
+      <div className="bg-white border-b border-stone-200 px-3 pt-5 pb-1.5 flex-shrink-0">
+        <div className="text-[10px] font-bold text-stone-900">Eastside Auto Care</div>
+        <div className="text-[7px] text-stone-500 mb-1.5">Auto Repair · Charlotte, NC · 19 ratings · ⭐⭐⭐⭐</div>
+        <div className="flex gap-1.5">
+          <div className="rounded bg-[#1877f2] px-2 py-0.5 text-[7px] font-medium text-white">👍 Like</div>
+          <div className="rounded border border-stone-300 px-2 py-0.5 text-[7px] text-stone-700">Follow</div>
+          <div className="rounded border border-stone-300 px-2 py-0.5 text-[7px] text-stone-700">Message</div>
+        </div>
+      </div>
+      {/* Feed */}
+      <div className="flex-1 bg-[#f0f2f5] p-2 overflow-hidden">
+        <div className="rounded-lg bg-white border border-stone-200 p-2 text-[7px] text-stone-400 italic">
+          No recent posts — last activity was 5 months ago.
+        </div>
+        <div className="mt-1.5 rounded-lg bg-white border border-stone-200 p-2">
+          <div className="text-[7px] font-semibold text-stone-700 mb-0.5">About</div>
+          <div className="text-[6.5px] text-stone-500">📍 1204 Central Ave, Charlotte, NC · 🕐 Mon–Fri 9am–5pm</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── AFTER mockups ─────────────────────────────────────────────────────────────
+
+function PlumberAfter() {
+  return (
+    <div className="h-52 overflow-hidden rounded-lg flex flex-col">
+      {/* Nav */}
+      <div className="flex items-center justify-between bg-white px-4 py-2 shadow-sm flex-shrink-0">
+        <div className="flex items-center gap-1.5">
+          <div className="h-4 w-4 rounded bg-slate-700 flex items-center justify-center text-[9px]">🔧</div>
+          <span className="text-[9px] font-bold text-slate-800">MillerPlumbing</span>
+        </div>
+        <div className="flex items-center gap-3 text-[7px] text-stone-500">
+          <span>Services</span><span>About</span><span>Reviews</span>
+          <div className="rounded bg-amber-500 px-2 py-0.5 text-white font-semibold">Call Now</div>
+        </div>
+      </div>
+      {/* Hero */}
+      <div className="flex-1 bg-slate-800 px-5 py-4 flex flex-col justify-between">
         <div>
-          <div className="mb-1 text-[7px] font-semibold uppercase tracking-widest text-amber-500">
-            Eastside Auto Care · Charlotte, NC
+          <div className="mb-1 text-[7px] font-semibold uppercase tracking-widest text-amber-400">
+            Austin's Trusted Plumber · Licensed &amp; Insured Since 1998
           </div>
-          <div className="mb-1 text-[14px] font-bold leading-tight text-white">
-            Charlotte's #1<br />Auto Repair Shop
+          <div className="mb-1.5 text-[16px] font-bold leading-tight text-white">
+            Fast, Reliable<br />Plumbing — 24/7
           </div>
-          <div className="mb-3 text-[8px] text-amber-400">★★★★★ 91 Reviews · Booked 2 Weeks Out</div>
-          <div className="flex gap-1.5">
-            <div className="rounded bg-amber-500 px-2.5 py-1 text-[8px] font-semibold text-white">Book Appointment</div>
-            <div className="rounded border border-stone-600 px-2.5 py-1 text-[8px] text-stone-300">Our Services</div>
+          <div className="mb-3 text-[7px] text-slate-400">
+            Same-day appointments available · No surprise fees · Emergency service
+          </div>
+          <div className="flex gap-2">
+            <div className="rounded bg-amber-500 px-3 py-1.5 text-[8px] font-bold text-white">
+              📞 (512) 555-0103
+            </div>
+            <div className="rounded border border-slate-500 px-3 py-1.5 text-[8px] text-slate-300">
+              Get Free Estimate
+            </div>
           </div>
         </div>
-        <div className="text-[7px] text-stone-500">Open Mon–Sat · 7am–6pm · (704) 555-0192</div>
+        <div>
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <span className="text-amber-400 text-[10px]">★★★★★</span>
+            <span className="text-[7px] text-slate-400">51 verified Google reviews</span>
+          </div>
+          <div className="text-[7px] italic text-slate-500">
+            "Showed up same day, done in 2 hours. Best plumber in Austin." — Karen M.
+          </div>
+        </div>
       </div>
-    </BrowserFrame>
+    </div>
+  );
+}
+
+function LandscapingAfter() {
+  return (
+    <div className="h-52 overflow-hidden rounded-lg flex flex-col">
+      {/* Nav */}
+      <div className="flex items-center justify-between bg-white px-4 py-2 shadow-sm flex-shrink-0">
+        <div className="flex items-center gap-1.5">
+          <div className="h-4 w-4 rounded-full bg-emerald-600 flex items-center justify-center text-[9px]">🌿</div>
+          <span className="text-[9px] font-bold text-emerald-900">GreenLeaf</span>
+        </div>
+        <div className="flex items-center gap-3 text-[7px] text-stone-500">
+          <span>Services</span><span>Portfolio</span><span>Reviews</span>
+          <div className="rounded bg-emerald-600 px-2 py-0.5 text-white font-semibold">Free Quote</div>
+        </div>
+      </div>
+      {/* Hero */}
+      <div className="flex-1 bg-emerald-800 px-5 py-4 flex flex-col justify-between">
+        <div>
+          <div className="mb-1 text-[7px] font-semibold uppercase tracking-widest text-emerald-300">
+            Denver's Landscaping Experts · Serving Homeowners Since 2008
+          </div>
+          <div className="mb-1.5 text-[16px] font-bold leading-tight text-white">
+            Outdoor Spaces<br />Worth Coming Home To
+          </div>
+          <div className="mb-3 text-[7px] text-emerald-300">
+            Lawn care · Hardscaping · Snow removal · Fully licensed &amp; insured
+          </div>
+          <div className="flex gap-2">
+            <div className="rounded bg-white px-3 py-1.5 text-[8px] font-bold text-emerald-800">
+              Get Free Quote →
+            </div>
+            <div className="rounded border border-emerald-600 px-3 py-1.5 text-[8px] text-emerald-300">
+              See Our Work
+            </div>
+          </div>
+        </div>
+        <div>
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <span className="text-amber-300 text-[10px]">★★★★★</span>
+            <span className="text-[7px] text-emerald-400">63 reviews · Fully booked every summer</span>
+          </div>
+          <div className="text-[7px] italic text-emerald-600">
+            "Completely transformed our backyard. Worth every penny." — Dave T.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AutoAfter() {
+  return (
+    <div className="h-52 overflow-hidden rounded-lg flex flex-col">
+      {/* Nav */}
+      <div className="flex items-center justify-between bg-stone-900 px-4 py-2 flex-shrink-0">
+        <span className="text-[9px] font-bold tracking-wider text-amber-400">EASTSIDE AUTO</span>
+        <div className="flex items-center gap-3 text-[7px] text-stone-400">
+          <span>Services</span><span>About</span><span>Reviews</span>
+          <div className="rounded bg-amber-500 px-2 py-0.5 text-white font-semibold text-[7px]">Book Now</div>
+        </div>
+      </div>
+      {/* Hero */}
+      <div className="flex-1 bg-stone-900 border-t border-stone-800 px-5 py-4 flex flex-col justify-between">
+        <div>
+          <div className="mb-1 text-[7px] font-semibold uppercase tracking-widest text-amber-500">
+            Charlotte's #1 Auto Repair · ASE-Certified Technicians
+          </div>
+          <div className="mb-1.5 text-[16px] font-bold leading-tight text-white">
+            Expert Service<br />You Can Trust
+          </div>
+          <div className="mb-3 text-[7px] text-stone-400">
+            Honest diagnostics · Fair prices · Mon–Sat 7am–6pm
+          </div>
+          <div className="flex gap-2">
+            <div className="rounded bg-amber-500 px-3 py-1.5 text-[8px] font-bold text-white">
+              Book Appointment
+            </div>
+            <div className="rounded border border-stone-600 px-3 py-1.5 text-[8px] text-stone-400">
+              View Services
+            </div>
+          </div>
+        </div>
+        <div>
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <span className="text-amber-400 text-[10px]">★★★★★</span>
+            <span className="text-[7px] text-stone-500">91 reviews · Booked 2 weeks out</span>
+          </div>
+          <div className="text-[7px] italic text-stone-600">
+            "Finally a mechanic I actually trust. Loyal customer for life." — Marcus B.
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -194,54 +299,24 @@ const EXAMPLES = [
     business: "Miller's Plumbing Co.",
     location: 'Austin, TX',
     category: 'Plumber',
-    before: {
-      website: 'No website',
-      reviews: '6 Google reviews',
-      visibility: 'Word of mouth only',
-      leads: '~4 calls / week',
-    },
-    after: {
-      website: 'millersplumbing.com',
-      reviews: '51 Google reviews',
-      visibility: '#2 for "plumber Austin"',
-      leads: '~22 calls / week',
-    },
+    before: { website: 'No website', reviews: '6 Google reviews', visibility: 'Word of mouth only', leads: '~4 calls / week' },
+    after:  { website: 'millersplumbing.com', reviews: '51 Google reviews', visibility: '#2 for "plumber Austin"', leads: '~22 calls / week' },
     result: '4× more inbound calls in 90 days',
   },
   {
     business: 'Green Leaf Landscaping',
     location: 'Denver, CO',
     category: 'Landscaping',
-    before: {
-      website: 'Site from 2013, not mobile-friendly',
-      reviews: '11 Google reviews',
-      visibility: 'Hard to find online',
-      leads: '~3 quote requests / week',
-    },
-    after: {
-      website: 'Modern site with online quotes',
-      reviews: '63 Google reviews',
-      visibility: 'Top 3 local results',
-      leads: '~11 quote requests / week',
-    },
+    before: { website: 'Site from 2013, not mobile-friendly', reviews: '11 Google reviews', visibility: 'Hard to find online', leads: '~3 quote requests / week' },
+    after:  { website: 'Modern site with online quotes', reviews: '63 Google reviews', visibility: 'Top 3 local results', leads: '~11 quote requests / week' },
     result: '3× more quote requests, fully booked summers',
   },
   {
     business: 'Eastside Auto Care',
     location: 'Charlotte, NC',
     category: 'Auto Repair',
-    before: {
-      website: 'Facebook page only',
-      reviews: '19 Google reviews',
-      visibility: 'Not ranking locally',
-      leads: 'Slow season regularly',
-    },
-    after: {
-      website: 'Professional site with booking',
-      reviews: '91 Google reviews',
-      visibility: '#1 for "auto repair Charlotte"',
-      leads: 'Booked out 2 weeks ahead',
-    },
+    before: { website: 'Facebook page only', reviews: '19 Google reviews', visibility: 'Not ranking locally', leads: 'Slow season regularly' },
+    after:  { website: 'Professional site with booking', reviews: '91 Google reviews', visibility: '#1 for "auto repair Charlotte"', leads: 'Booked out 2 weeks ahead' },
     result: 'Eliminated slow season entirely',
   },
 ];
@@ -279,28 +354,24 @@ function BeforeAfterCard({
 
       {/* Before / After columns */}
       <div className="grid grid-cols-2 divide-x divide-stone-200">
-        {/* Before */}
         <div className="p-5">
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-red-500">Before</p>
           {beforeMockup}
           <ul className="mt-4 space-y-2.5">
             {Object.values(example.before).map((v, i) => (
               <li key={i} className="flex items-start gap-2 text-sm text-stone-600">
-                <span className="mt-0.5 text-red-400">✗</span>
-                {v}
+                <span className="mt-0.5 text-red-400">✗</span>{v}
               </li>
             ))}
           </ul>
         </div>
-        {/* After */}
         <div className="p-5">
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-emerald-600">After</p>
           {afterMockup}
           <ul className="mt-4 space-y-2.5">
             {Object.values(example.after).map((v, i) => (
               <li key={i} className="flex items-start gap-2 text-sm text-stone-800">
-                <span className="mt-0.5 text-emerald-500">✓</span>
-                {v}
+                <span className="mt-0.5 text-emerald-500">✓</span>{v}
               </li>
             ))}
           </ul>
@@ -319,9 +390,7 @@ export default function PublicPage() {
       <header className="border-b border-stone-200 bg-white px-6 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
           <span className="text-sm font-semibold text-stone-900">Clearsite</span>
-          <Link href="/login" className="text-sm text-stone-500 transition hover:text-stone-700">
-            Admin
-          </Link>
+          <Link href="/login" className="text-sm text-stone-500 transition hover:text-stone-700">Admin</Link>
         </div>
       </header>
 
@@ -350,7 +419,7 @@ export default function PublicPage() {
         </div>
       </section>
 
-      {/* Stats row */}
+      {/* Stats */}
       <section className="border-y border-stone-200 bg-white py-10">
         <div className="mx-auto grid max-w-5xl grid-cols-3 gap-6 px-6 text-center">
           {[
