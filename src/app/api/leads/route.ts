@@ -53,6 +53,9 @@ export async function POST(req: NextRequest) {
       website: body.website ?? null,
       rating: body.rating ?? null,
       reviewCount: body.reviewCount ?? null,
+      notes: body.notes ?? null,
+      contactName: body.contactName ?? null,
+      contactEmail: body.contactEmail ?? null,
       status: body.status ?? 'new',
     },
   });
