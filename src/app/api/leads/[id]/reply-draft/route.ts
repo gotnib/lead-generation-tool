@@ -48,9 +48,13 @@ export async function POST(
     .map((msg) => {
       const speaker = msg.direction === 'sent' ? 'Jason (you)' : lead.businessName;
       const date = new Date(msg.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      return `[${date}] ${speaker}:\n${msg.body.trim()}`;
+      return `[${date}] ${speaker}:\n${(msg.body ?? '').trim()}`;
     })
     .join('\n\n---\n\n');
+
+  if (!threadText.trim()) {
+    return NextResponse.json({ error: 'Thread messages have no content' }, { status: 400 });
+  }
 
   const prompt = `Business: ${lead.businessName} (${lead.category}, ${lead.city})
 Contact: ${lead.contactName ?? 'the owner'}
@@ -68,7 +72,8 @@ Write Jason's reply to the most recent message above.`;
       messages: [{ role: 'user', content: prompt }],
     });
 
-    const draft = message.content[0].type === 'text' ? message.content[0].text.trim() : '';
+    const textBlock = message.content.find((b) => b.type === 'text');
+    const draft = textBlock?.type === 'text' ? textBlock.text.trim() : '';
     return NextResponse.json({ draft });
   } catch (err) {
     console.error('Reply draft error:', err);

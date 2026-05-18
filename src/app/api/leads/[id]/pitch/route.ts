@@ -110,7 +110,8 @@ Start the email with: ${greeting}`;
       messages: [{ role: 'user', content: prompt }],
     });
 
-    const raw = message.content[0].type === 'text' ? message.content[0].text : '';
+    const textBlock = message.content.find((b) => b.type === 'text');
+    const raw = textBlock?.type === 'text' ? textBlock.text : '';
     const [bodyPart, subjectPart] = raw.split(/\n---SUBJECTS---\n/);
     const pitchEmail = bodyPart.trim();
     const subjectLines = (subjectPart ?? '')

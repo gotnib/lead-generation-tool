@@ -111,7 +111,8 @@ Return JSON only:
     ],
   });
 
-  const raw = msg.content[0].type === 'text' ? msg.content[0].text.trim() : '{}';
+  const textBlock = msg.content.find((b) => b.type === 'text');
+  const raw = textBlock?.type === 'text' ? textBlock.text.trim() : '{}';
   const match = raw.match(/\{[\s\S]*\}/);
   if (!match) return { contactName: null, contactEmail: null };
 

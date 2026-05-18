@@ -194,7 +194,8 @@ Keep each reason to one short sentence focusing on the specific signal that make
       ],
     });
 
-    const text = msg.content[0].type === 'text' ? msg.content[0].text.trim() : '[]';
+    const textBlock = msg.content.find((b) => b.type === 'text');
+    const text = textBlock?.type === 'text' ? textBlock.text.trim() : '[]';
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (!jsonMatch) return businesses;
 

@@ -218,13 +218,17 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
   };
 
   const handleGenerateReplyDraft = async () => {
+    if (!emails.length) {
+      setPitchError('No conversation thread to draft a reply from');
+      return;
+    }
     setIsGenerating(true);
     setPitchError('');
     try {
       const thread = emails.map((e) => ({
         direction: e.direction,
         subject: e.subject,
-        body: e.body,
+        body: e.body ?? '',
         createdAt: e.createdAt,
       }));
       const res = await fetch(`/api/leads/${lead.id}/reply-draft`, {
