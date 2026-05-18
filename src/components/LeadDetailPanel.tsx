@@ -58,6 +58,9 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
   const [isAddingLink, setIsAddingLink] = useState(false);
   const [newLinkLabel, setNewLinkLabel] = useState('');
   const [newLinkUrl, setNewLinkUrl] = useState('');
+  const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile' | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState(false);
 
   useEffect(() => {
     if (lead) {
@@ -89,6 +92,8 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       setIsAddingLink(false);
       setNewLinkLabel('');
       setNewLinkUrl('');
+      setPreviewMode(null);
+      setPreviewError(false);
     }
   }, [lead]);
 
@@ -378,23 +383,34 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
                 <input type="text" value={form.website} onChange={set('website')} placeholder="example.com" className={inputClass} />
                 {form.website && (
                   <>
-                    <a href={form.website.startsWith('http') ? form.website : `https://${form.website}`}
-                      target="_blank" rel="noopener noreferrer"
-                      className="flex shrink-0 items-center justify-center rounded-lg border border-stone-300 bg-stone-50 px-2.5 text-stone-400 transition hover:border-amber-400 hover:text-amber-600"
-                      title="Open website">
-                      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M5 1H1v12h12V9M9 1h4v4M5.5 8.5l7-7" />
+                    {/* Desktop preview */}
+                    <button
+                      onClick={() => {
+                        if (previewMode === 'desktop') { setPreviewMode(null); return; }
+                        setPreviewMode('desktop'); setPreviewLoading(true); setPreviewError(false);
+                      }}
+                      title="Desktop preview"
+                      className={`flex shrink-0 items-center justify-center rounded-lg border px-2.5 transition focus:outline-none ${previewMode === 'desktop' ? 'border-amber-400 bg-amber-50 text-amber-600' : 'border-stone-300 bg-stone-50 text-stone-400 hover:border-amber-400 hover:text-amber-600'}`}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="1" y="2" width="12" height="8" rx="1" />
+                        <path d="M4 13h6M7 10v3" />
                       </svg>
-                    </a>
-                    <a href={`https://www.responsinator.com/?url=${encodeURIComponent(form.website.startsWith('http') ? form.website : `https://${form.website}`)}`}
-                      target="_blank" rel="noopener noreferrer"
-                      className="flex shrink-0 items-center justify-center rounded-lg border border-stone-300 bg-stone-50 px-2.5 text-stone-400 transition hover:border-amber-400 hover:text-amber-600"
-                      title="View mobile layout">
+                    </button>
+                    {/* Mobile preview */}
+                    <button
+                      onClick={() => {
+                        if (previewMode === 'mobile') { setPreviewMode(null); return; }
+                        setPreviewMode('mobile'); setPreviewLoading(true); setPreviewError(false);
+                      }}
+                      title="Mobile preview"
+                      className={`flex shrink-0 items-center justify-center rounded-lg border px-2.5 transition focus:outline-none ${previewMode === 'mobile' ? 'border-amber-400 bg-amber-50 text-amber-600' : 'border-stone-300 bg-stone-50 text-stone-400 hover:border-amber-400 hover:text-amber-600'}`}
+                    >
                       <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="4" y="1" width="6" height="12" rx="1" />
                         <path d="M6.5 10.5h1" />
                       </svg>
-                    </a>
+                    </button>
                   </>
                 )}
               </div>
@@ -404,6 +420,41 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
               <input type="text" value={form.address} onChange={set('address')} placeholder="123 Main St…" className={inputClass} />
             </div>
           </div>
+
+          {/* Website preview */}
+          {previewMode && form.website && (() => {
+            const url = encodeURIComponent(form.website.startsWith('http') ? form.website : `https://${form.website}`);
+            const src = `/api/screenshot?url=${url}&mode=${previewMode}`;
+            return (
+              <div className="overflow-hidden rounded-lg border border-stone-200">
+                <div className="flex items-center justify-between border-b border-stone-200 bg-stone-50 px-3 py-1.5">
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-stone-400">
+                    {previewMode === 'desktop' ? 'Desktop' : 'Mobile'} preview
+                  </span>
+                  {previewLoading && (
+                    <span className="flex items-center gap-1.5 text-[11px] text-stone-400">
+                      <span className="h-2.5 w-2.5 animate-spin rounded-full border-2 border-stone-300 border-t-stone-500" />
+                      Capturing…
+                    </span>
+                  )}
+                </div>
+                {previewError ? (
+                  <p className="py-6 text-center text-xs text-stone-400">Could not capture preview</p>
+                ) : (
+                  <div className={`overflow-auto bg-white ${previewMode === 'mobile' ? 'flex justify-center py-2' : ''}`}>
+                    <img
+                      key={src}
+                      src={src}
+                      alt={`${previewMode} preview`}
+                      onLoad={() => setPreviewLoading(false)}
+                      onError={() => { setPreviewLoading(false); setPreviewError(true); }}
+                      className={previewMode === 'mobile' ? 'w-[280px] rounded shadow-sm' : 'w-full'}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Links */}
           <div>
