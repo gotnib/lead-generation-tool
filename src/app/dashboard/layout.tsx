@@ -22,13 +22,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <header className="sticky top-0 z-30 border-b border-stone-200 bg-white shadow-sm">
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6">
           <div className="flex h-14 items-center justify-between">
-            <Link href="/dashboard" className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path d="M2 3h10M2 7h7M2 11h5" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </div>
-              <span className="text-sm font-semibold tracking-tight text-stone-900">Clearsite</span>
+            <Link href="/dashboard" className="flex items-center">
+              <img src="/clearsite-logo.png" alt="Clearsite" className="h-8 w-auto" />
             </Link>
 
             <div className="flex items-center gap-1">

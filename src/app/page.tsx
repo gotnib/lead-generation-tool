@@ -360,9 +360,8 @@ export default function PublicPage() {
       {/* Sticky nav */}
       <header className="sticky top-0 z-20 border-b border-stone-200 bg-white/95 backdrop-blur-sm shadow-sm">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-amber-400" />
-            <span className="text-sm font-bold tracking-tight text-stone-900">Clearsite</span>
+          <div className="flex items-center">
+            <img src="/clearsite-logo.png" alt="Clearsite" className="h-9 w-auto" />
           </div>
           <nav className="hidden items-center gap-6 text-sm text-stone-500 sm:flex">
             <a href="#how-it-works" className="transition-colors hover:text-stone-800">How it works</a>

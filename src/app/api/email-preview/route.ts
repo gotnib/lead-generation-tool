@@ -62,15 +62,11 @@ function buildHtml(body: string): string {
               <table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">
                 <tr>
                   <td style="border-top:1px solid #e8dfd0;padding-top:20px;">
-                    <!-- Logo mark + wordmark -->
+                    <!-- Logo -->
                     <table cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:14px;">
                       <tr>
-                        <td style="width:36px;height:36px;background-color:#f59e0b;border-radius:18px;text-align:center;vertical-align:middle;">
-                          <span style="color:#ffffff;font-size:19px;font-weight:900;font-family:Georgia,'Times New Roman',serif;line-height:36px;">C</span>
-                        </td>
-                        <td style="padding-left:10px;vertical-align:middle;">
-                          <span style="font-size:17px;font-weight:700;color:#1c1917;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">Clear</span><span style="font-size:17px;font-weight:700;color:#d97706;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">site</span><br>
-                          <span style="font-size:9px;letter-spacing:0.12em;color:#a8a29e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">FIND&nbsp;&middot;&nbsp;ENRICH&nbsp;&middot;&nbsp;CONNECT&nbsp;&middot;&nbsp;GROW</span>
+                        <td>
+                          <img src="https://clearsite.online/clearsite-logo.png" alt="Clearsite" width="160" style="display:block;border:0;outline:none;">
                         </td>
                       </tr>
                     </table>
