@@ -62,18 +62,18 @@ function buildHtml(body: string): string {
               <table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">
                 <tr>
                   <td style="border-top:1px solid #e8dfd0;padding-top:20px;">
-                    <!-- Logo -->
-                    <table cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:14px;">
+                    <table cellpadding="0" cellspacing="0" role="presentation">
                       <tr>
-                        <td>
-                          <img src="https://clearsite.online/clearsite-logo.png" alt="Clearsite" width="160" style="display:block;border:0;outline:none;">
+                        <!-- Logo -->
+                        <td style="vertical-align:middle;padding-right:16px;">
+                          <img src="https://clearsite.online/clearsite-logo.png" alt="Clearsite" width="120" style="display:block;border:0;outline:none;">
                         </td>
-                      </tr>
-                    </table>
-                    <!-- Sender name -->
-                    <table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">
-                      <tr>
-                        <td style="border-top:1px solid #f0e8d8;padding-top:10px;">
+                        <!-- Divider -->
+                        <td style="vertical-align:middle;padding-right:16px;">
+                          <div style="width:1px;height:36px;background-color:#e8dfd0;"></div>
+                        </td>
+                        <!-- Name -->
+                        <td style="vertical-align:middle;">
                           <span style="display:block;font-size:14px;font-weight:600;color:#1c1917;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">Jason Davis</span>
                           <span style="font-size:12px;color:#78716c;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">Clearsite</span>
                         </td>
