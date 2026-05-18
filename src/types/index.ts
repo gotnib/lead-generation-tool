@@ -1,5 +1,10 @@
 export type LeadStatus = 'new' | 'contacted' | 'interested' | 'proposal' | 'closed' | 'lost';
 
+export interface LeadLink {
+  label: string;
+  url: string;
+}
+
 export interface Lead {
   id: string;
   businessName: string;
@@ -16,6 +21,7 @@ export interface Lead {
   contactName: string | null;
   contactEmail: string | null;
   hasUnreadReply: boolean;
+  links: LeadLink[] | null;
   createdAt: string;
   updatedAt: string;
 }

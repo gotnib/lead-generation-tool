@@ -24,6 +24,7 @@ model Lead {
   contactName  String?
   contactEmail   String?
   hasUnreadReply Boolean  @default(false)
+  links          Json?
   emails         Email[]
   createdAt      DateTime @default(now())
   updatedAt    DateTime @updatedAt

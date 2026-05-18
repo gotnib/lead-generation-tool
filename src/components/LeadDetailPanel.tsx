@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Lead, EmailMessage } from '@/types';
+import type { Lead, EmailMessage, LeadLink } from '@/types';
 import { PIPELINE_STAGES } from '@/types';
 
 interface Props {
@@ -54,6 +54,9 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
   const [isSendingReply, setIsSendingReply] = useState(false);
   const [replyError, setReplyError] = useState('');
   const [expandedEmailId, setExpandedEmailId] = useState<string | null>(null);
+  const [links, setLinks] = useState<LeadLink[]>([]);
+  const [newLinkLabel, setNewLinkLabel] = useState('');
+  const [newLinkUrl, setNewLinkUrl] = useState('');
 
   useEffect(() => {
     if (lead) {
@@ -81,6 +84,9 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
       setInlineReplyBody('');
       setReplyError('');
       setExpandedEmailId(null);
+      setLinks(Array.isArray(lead.links) ? lead.links : []);
+      setNewLinkLabel('');
+      setNewLinkUrl('');
     }
   }, [lead]);
 
@@ -131,6 +137,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
           notes: form.notes || null,
           contactName: form.contactName || null,
           contactEmail: form.contactEmail || null,
+          links: links.length > 0 ? links : null,
         }),
       });
       const updated = await res.json();
@@ -347,6 +354,70 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
             <div className="col-span-2">
               <label className={labelClass}>Address</label>
               <input type="text" value={form.address} onChange={set('address')} placeholder="123 Main St…" className={inputClass} />
+            </div>
+          </div>
+
+          {/* Links */}
+          <div>
+            <label className={labelClass}>Links</label>
+            {links.length > 0 && (
+              <div className="mb-2 space-y-1.5">
+                {links.map((link, i) => (
+                  <div key={i} className="flex items-center gap-2 rounded-lg border border-stone-200 bg-stone-50 px-3 py-2">
+                    <span className="min-w-[72px] shrink-0 text-[11px] font-medium text-stone-500">{link.label}</span>
+                    <a
+                      href={link.url.startsWith('http') ? link.url : `https://${link.url}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex-1 truncate text-xs text-amber-600 hover:underline"
+                    >
+                      {link.url}
+                    </a>
+                    <button
+                      onClick={() => setLinks((prev) => prev.filter((_, j) => j !== i))}
+                      className="shrink-0 rounded p-0.5 text-stone-400 transition hover:bg-red-50 hover:text-red-500 focus:outline-none"
+                      aria-label="Remove link"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                        <path d="M2 2l8 8M10 2l-8 8" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-1.5">
+              <input
+                type="text"
+                value={newLinkLabel}
+                onChange={(e) => setNewLinkLabel(e.target.value)}
+                placeholder="Label (e.g. Google, Yelp)"
+                className={`w-36 shrink-0 ${inputClass}`}
+              />
+              <input
+                type="text"
+                value={newLinkUrl}
+                onChange={(e) => setNewLinkUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newLinkUrl.trim()) {
+                    setLinks((prev) => [...prev, { label: newLinkLabel.trim() || 'Link', url: newLinkUrl.trim() }]);
+                    setNewLinkLabel('');
+                    setNewLinkUrl('');
+                  }
+                }}
+                placeholder="https://…"
+                className={inputClass}
+              />
+              <button
+                onClick={() => {
+                  if (!newLinkUrl.trim()) return;
+                  setLinks((prev) => [...prev, { label: newLinkLabel.trim() || 'Link', url: newLinkUrl.trim() }]);
+                  setNewLinkLabel('');
+                  setNewLinkUrl('');
+                }}
+                className="shrink-0 rounded-lg border border-stone-300 bg-stone-50 px-3 text-sm text-stone-600 transition hover:border-amber-400 hover:text-amber-600 focus:outline-none"
+              >
+                Add
+              </button>
             </div>
           </div>
 
