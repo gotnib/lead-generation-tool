@@ -4,8 +4,7 @@ import Link from 'next/link';
 
 function PlumberBefore() {
   return (
-    <div className="h-52 overflow-hidden rounded-lg border border-stone-200 flex flex-col text-[8px]">
-      {/* Google top bar */}
+    <div className="h-52 overflow-hidden rounded-xl border border-stone-200 flex flex-col text-[8px]">
       <div className="flex items-center gap-2 bg-white px-3 py-1.5 shadow-sm flex-shrink-0">
         <span className="font-bold text-[11px] tracking-tight">
           <span className="text-blue-600">G</span><span className="text-red-500">o</span>
@@ -16,38 +15,28 @@ function PlumberBefore() {
           miller's plumbing austin tx
         </div>
       </div>
-      {/* Listing panel */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left: business info */}
         <div className="w-[52%] border-r border-stone-100 bg-white p-2.5 overflow-hidden">
           <div className="mb-0.5 text-[10px] font-bold text-stone-900">Miller's Plumbing Co.</div>
           <div className="mb-1 text-amber-500">★★★★☆ <span className="text-stone-500">6 reviews · Plumber</span></div>
           <div className="mb-2 text-[7px] text-stone-500">Austin, TX · Open · Closes 5 PM</div>
           <div className="mb-2 grid grid-cols-3 gap-1">
-            {['Directions','📞 Call','Share'].map(l => (
+            {['Directions', '📞 Call', 'Share'].map(l => (
               <div key={l} className="rounded border border-stone-200 py-0.5 text-center text-[6.5px] text-blue-600">{l}</div>
             ))}
           </div>
           <div className="space-y-1 border-t border-stone-100 pt-1.5">
-            <div className="flex items-center gap-1 text-stone-400 italic">
-              <span>🌐</span><span>No website</span>
-            </div>
-            <div className="flex items-center gap-1 text-stone-600">
-              <span>📞</span><span>(512) 555-0103</span>
-            </div>
-            <div className="flex items-center gap-1 text-blue-600">
-              <span>👤</span><span>facebook.com/millersplumbing</span>
-            </div>
+            <div className="flex items-center gap-1 text-stone-400 italic"><span>🌐</span><span>No website</span></div>
+            <div className="flex items-center gap-1 text-stone-600"><span>📞</span><span>(512) 555-0103</span></div>
+            <div className="flex items-center gap-1 text-blue-600"><span>👤</span><span>facebook.com/millersplumbing</span></div>
           </div>
         </div>
-        {/* Right: fake map */}
         <div className="flex-1 relative bg-[#e8e0d8] overflow-hidden">
           <div className="absolute inset-0 opacity-50">
             <div className="absolute left-0 right-0 top-[30%] h-px bg-[#c8b89a]" />
             <div className="absolute left-0 right-0 top-[60%] h-[2px] bg-[#c8b89a]" />
             <div className="absolute top-0 bottom-0 left-[40%] w-px bg-[#c8b89a]" />
             <div className="absolute top-0 bottom-0 left-[70%] w-px bg-[#c8b89a]" />
-            <div className="absolute left-0 right-0 top-[45%] h-px bg-[#d4c4aa]" />
           </div>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="flex flex-col items-center">
@@ -63,27 +52,22 @@ function PlumberBefore() {
 
 function LandscapingBefore() {
   return (
-    <div className="h-52 overflow-hidden rounded-lg border border-stone-200 flex flex-col text-[8px]">
-      {/* Old site header */}
+    <div className="h-52 overflow-hidden rounded-xl border border-stone-200 flex flex-col text-[8px]">
       <div className="bg-green-800 px-3 py-2 text-center flex-shrink-0">
         <div className="text-[12px] font-bold text-yellow-300 leading-tight">🌿 GREEN LEAF LANDSCAPING 🌿</div>
         <div className="text-[7px] text-yellow-200">Denver, Colorado · Quality You Can Count On!</div>
       </div>
-      {/* Old nav */}
       <div className="bg-green-600 py-1 text-center text-[7px] text-white flex-shrink-0">
-        <span className="underline">HOME</span>
-        {' | '}<span className="text-yellow-300 underline cursor-pointer">SERVICES</span>
-        {' | '}<span className="underline">GALLERY</span>
-        {' | '}<span className="underline">CONTACT US</span>
+        <span className="underline">HOME</span>{' | '}
+        <span className="text-yellow-300 underline">SERVICES</span>{' | '}
+        <span className="underline">GALLERY</span>{' | '}
+        <span className="underline">CONTACT US</span>
       </div>
-      {/* Old content */}
       <div className="flex-1 bg-[#f5f0e8] overflow-hidden p-2.5">
-        <div className="mb-1.5 text-center text-[7px] font-bold text-green-900 underline">
-          ★ Welcome to Our Website! Click Here to Learn More ★
-        </div>
+        <div className="mb-1.5 text-center text-[7px] font-bold text-green-900 underline">★ Welcome! Click Here to Learn More ★</div>
         <div className="flex gap-2">
           <div className="flex-1 text-[7px] text-stone-700">
-            <div className="mb-1">We are a <span className="font-bold">family owned</span> landscaping buisness serving the Denver area since 2008!!!</div>
+            <div className="mb-1">We are a <span className="font-bold">family owned</span> landscaping buisness serving Denver since 2008!!!</div>
             <div className="text-green-800 font-bold mb-0.5">Our Services:</div>
             {['Lawn Mowing', 'Tree Trimming', 'Sprinkler Repair', 'Snow Removal'].map(s => (
               <div key={s} className="text-[6.5px]">• {s}</div>
@@ -99,9 +83,7 @@ function LandscapingBefore() {
         <div className="mt-2 border-t border-stone-400 pt-1 text-center text-[6px] text-stone-500">
           📞 (303) 555-0177 &nbsp;|&nbsp; Last Updated: March 2014 &nbsp;|&nbsp; Visitors: 4,892
         </div>
-        <div className="mt-0.5 text-center text-[5.5px] text-stone-400 italic">
-          Best viewed in Internet Explorer 8 · 800×600 resolution recommended
-        </div>
+        <div className="mt-0.5 text-center text-[5.5px] text-stone-400 italic">Best viewed in Internet Explorer 8</div>
       </div>
     </div>
   );
@@ -109,21 +91,17 @@ function LandscapingBefore() {
 
 function AutoBefore() {
   return (
-    <div className="h-52 overflow-hidden rounded-lg border border-stone-200 flex flex-col text-[8px] bg-[#f0f2f5]">
-      {/* Facebook top bar */}
+    <div className="h-52 overflow-hidden rounded-xl border border-stone-200 flex flex-col text-[8px] bg-[#f0f2f5]">
       <div className="flex items-center gap-2 bg-[#1877f2] px-3 py-1.5 flex-shrink-0">
         <span className="text-white font-black text-[14px] leading-none">f</span>
         <div className="flex-1 rounded-full bg-white/20 px-2 py-0.5 text-[7px] text-white/70">🔍 Search Facebook</div>
         <div className="text-white/70 text-[9px]">⋯</div>
       </div>
-      {/* Cover photo */}
       <div className="relative h-14 bg-stone-500 flex-shrink-0">
-        <div className="absolute inset-0 bg-stone-600 opacity-60" />
-        <div className="absolute bottom-0 left-3 translate-y-1/2 flex items-end gap-2">
+        <div className="absolute bottom-0 left-3 translate-y-1/2">
           <div className="h-9 w-9 rounded-lg border-2 border-white bg-stone-800 flex items-center justify-center text-white font-black text-[13px]">E</div>
         </div>
       </div>
-      {/* Name + actions */}
       <div className="bg-white border-b border-stone-200 px-3 pt-5 pb-1.5 flex-shrink-0">
         <div className="text-[10px] font-bold text-stone-900">Eastside Auto Care</div>
         <div className="text-[7px] text-stone-500 mb-1.5">Auto Repair · Charlotte, NC · 19 ratings · ⭐⭐⭐⭐</div>
@@ -133,12 +111,11 @@ function AutoBefore() {
           <div className="rounded border border-stone-300 px-2 py-0.5 text-[7px] text-stone-700">Message</div>
         </div>
       </div>
-      {/* Feed */}
-      <div className="flex-1 bg-[#f0f2f5] p-2 overflow-hidden">
+      <div className="flex-1 bg-[#f0f2f5] p-2 overflow-hidden space-y-1.5">
         <div className="rounded-lg bg-white border border-stone-200 p-2 text-[7px] text-stone-400 italic">
-          No recent posts — last activity was 5 months ago.
+          No recent posts — last activity 5 months ago.
         </div>
-        <div className="mt-1.5 rounded-lg bg-white border border-stone-200 p-2">
+        <div className="rounded-lg bg-white border border-stone-200 p-2">
           <div className="text-[7px] font-semibold text-stone-700 mb-0.5">About</div>
           <div className="text-[6.5px] text-stone-500">📍 1204 Central Ave, Charlotte, NC · 🕐 Mon–Fri 9am–5pm</div>
         </div>
@@ -151,8 +128,7 @@ function AutoBefore() {
 
 function PlumberAfter() {
   return (
-    <div className="h-52 overflow-hidden rounded-lg flex flex-col">
-      {/* Nav */}
+    <div className="h-52 overflow-hidden rounded-xl flex flex-col">
       <div className="flex items-center justify-between bg-white px-4 py-2 shadow-sm flex-shrink-0">
         <div className="flex items-center gap-1.5">
           <div className="h-4 w-4 rounded bg-slate-700 flex items-center justify-center text-[9px]">🔧</div>
@@ -163,25 +139,14 @@ function PlumberAfter() {
           <div className="rounded bg-amber-500 px-2 py-0.5 text-white font-semibold">Call Now</div>
         </div>
       </div>
-      {/* Hero */}
       <div className="flex-1 bg-slate-800 px-5 py-4 flex flex-col justify-between">
         <div>
-          <div className="mb-1 text-[7px] font-semibold uppercase tracking-widest text-amber-400">
-            Austin's Trusted Plumber · Licensed &amp; Insured Since 1998
-          </div>
-          <div className="mb-1.5 text-[16px] font-bold leading-tight text-white">
-            Fast, Reliable<br />Plumbing — 24/7
-          </div>
-          <div className="mb-3 text-[7px] text-slate-400">
-            Same-day appointments available · No surprise fees · Emergency service
-          </div>
+          <div className="mb-1 text-[7px] font-semibold uppercase tracking-widest text-amber-400">Austin's Trusted Plumber · Licensed &amp; Insured</div>
+          <div className="mb-1.5 text-[16px] font-bold leading-tight text-white">Fast, Reliable<br />Plumbing — 24/7</div>
+          <div className="mb-3 text-[7px] text-slate-400">Same-day appointments · No surprise fees · Emergency service</div>
           <div className="flex gap-2">
-            <div className="rounded bg-amber-500 px-3 py-1.5 text-[8px] font-bold text-white">
-              📞 (512) 555-0103
-            </div>
-            <div className="rounded border border-slate-500 px-3 py-1.5 text-[8px] text-slate-300">
-              Get Free Estimate
-            </div>
+            <div className="rounded bg-amber-500 px-3 py-1.5 text-[8px] font-bold text-white">📞 (512) 555-0103</div>
+            <div className="rounded border border-slate-500 px-3 py-1.5 text-[8px] text-slate-300">Get Free Estimate</div>
           </div>
         </div>
         <div>
@@ -189,9 +154,7 @@ function PlumberAfter() {
             <span className="text-amber-400 text-[10px]">★★★★★</span>
             <span className="text-[7px] text-slate-400">51 verified Google reviews</span>
           </div>
-          <div className="text-[7px] italic text-slate-500">
-            "Showed up same day, done in 2 hours. Best plumber in Austin." — Karen M.
-          </div>
+          <div className="text-[7px] italic text-slate-500">"Showed up same day, done in 2 hours. Best plumber in Austin." — Karen M.</div>
         </div>
       </div>
     </div>
@@ -200,8 +163,7 @@ function PlumberAfter() {
 
 function LandscapingAfter() {
   return (
-    <div className="h-52 overflow-hidden rounded-lg flex flex-col">
-      {/* Nav */}
+    <div className="h-52 overflow-hidden rounded-xl flex flex-col">
       <div className="flex items-center justify-between bg-white px-4 py-2 shadow-sm flex-shrink-0">
         <div className="flex items-center gap-1.5">
           <div className="h-4 w-4 rounded-full bg-emerald-600 flex items-center justify-center text-[9px]">🌿</div>
@@ -212,25 +174,14 @@ function LandscapingAfter() {
           <div className="rounded bg-emerald-600 px-2 py-0.5 text-white font-semibold">Free Quote</div>
         </div>
       </div>
-      {/* Hero */}
       <div className="flex-1 bg-emerald-800 px-5 py-4 flex flex-col justify-between">
         <div>
-          <div className="mb-1 text-[7px] font-semibold uppercase tracking-widest text-emerald-300">
-            Denver's Landscaping Experts · Serving Homeowners Since 2008
-          </div>
-          <div className="mb-1.5 text-[16px] font-bold leading-tight text-white">
-            Outdoor Spaces<br />Worth Coming Home To
-          </div>
-          <div className="mb-3 text-[7px] text-emerald-300">
-            Lawn care · Hardscaping · Snow removal · Fully licensed &amp; insured
-          </div>
+          <div className="mb-1 text-[7px] font-semibold uppercase tracking-widest text-emerald-300">Denver's Landscaping Experts · Since 2008</div>
+          <div className="mb-1.5 text-[16px] font-bold leading-tight text-white">Outdoor Spaces<br />Worth Coming Home To</div>
+          <div className="mb-3 text-[7px] text-emerald-300">Lawn care · Hardscaping · Snow removal · Fully licensed</div>
           <div className="flex gap-2">
-            <div className="rounded bg-white px-3 py-1.5 text-[8px] font-bold text-emerald-800">
-              Get Free Quote →
-            </div>
-            <div className="rounded border border-emerald-600 px-3 py-1.5 text-[8px] text-emerald-300">
-              See Our Work
-            </div>
+            <div className="rounded bg-white px-3 py-1.5 text-[8px] font-bold text-emerald-800">Get Free Quote →</div>
+            <div className="rounded border border-emerald-600 px-3 py-1.5 text-[8px] text-emerald-300">See Our Work</div>
           </div>
         </div>
         <div>
@@ -238,9 +189,7 @@ function LandscapingAfter() {
             <span className="text-amber-300 text-[10px]">★★★★★</span>
             <span className="text-[7px] text-emerald-400">63 reviews · Fully booked every summer</span>
           </div>
-          <div className="text-[7px] italic text-emerald-600">
-            "Completely transformed our backyard. Worth every penny." — Dave T.
-          </div>
+          <div className="text-[7px] italic text-emerald-600">"Completely transformed our backyard. Worth every penny." — Dave T.</div>
         </div>
       </div>
     </div>
@@ -249,8 +198,7 @@ function LandscapingAfter() {
 
 function AutoAfter() {
   return (
-    <div className="h-52 overflow-hidden rounded-lg flex flex-col">
-      {/* Nav */}
+    <div className="h-52 overflow-hidden rounded-xl flex flex-col">
       <div className="flex items-center justify-between bg-stone-900 px-4 py-2 flex-shrink-0">
         <span className="text-[9px] font-bold tracking-wider text-amber-400">EASTSIDE AUTO</span>
         <div className="flex items-center gap-3 text-[7px] text-stone-400">
@@ -258,25 +206,14 @@ function AutoAfter() {
           <div className="rounded bg-amber-500 px-2 py-0.5 text-white font-semibold text-[7px]">Book Now</div>
         </div>
       </div>
-      {/* Hero */}
       <div className="flex-1 bg-stone-900 border-t border-stone-800 px-5 py-4 flex flex-col justify-between">
         <div>
-          <div className="mb-1 text-[7px] font-semibold uppercase tracking-widest text-amber-500">
-            Charlotte's #1 Auto Repair · ASE-Certified Technicians
-          </div>
-          <div className="mb-1.5 text-[16px] font-bold leading-tight text-white">
-            Expert Service<br />You Can Trust
-          </div>
-          <div className="mb-3 text-[7px] text-stone-400">
-            Honest diagnostics · Fair prices · Mon–Sat 7am–6pm
-          </div>
+          <div className="mb-1 text-[7px] font-semibold uppercase tracking-widest text-amber-500">Charlotte's #1 Auto Repair · ASE-Certified</div>
+          <div className="mb-1.5 text-[16px] font-bold leading-tight text-white">Expert Service<br />You Can Trust</div>
+          <div className="mb-3 text-[7px] text-stone-400">Honest diagnostics · Fair prices · Mon–Sat 7am–6pm</div>
           <div className="flex gap-2">
-            <div className="rounded bg-amber-500 px-3 py-1.5 text-[8px] font-bold text-white">
-              Book Appointment
-            </div>
-            <div className="rounded border border-stone-600 px-3 py-1.5 text-[8px] text-stone-400">
-              View Services
-            </div>
+            <div className="rounded bg-amber-500 px-3 py-1.5 text-[8px] font-bold text-white">Book Appointment</div>
+            <div className="rounded border border-stone-600 px-3 py-1.5 text-[8px] text-stone-400">View Services</div>
           </div>
         </div>
         <div>
@@ -284,9 +221,7 @@ function AutoAfter() {
             <span className="text-amber-400 text-[10px]">★★★★★</span>
             <span className="text-[7px] text-stone-500">91 reviews · Booked 2 weeks out</span>
           </div>
-          <div className="text-[7px] italic text-stone-600">
-            "Finally a mechanic I actually trust. Loyal customer for life." — Marcus B.
-          </div>
+          <div className="text-[7px] italic text-stone-600">"Finally a mechanic I actually trust. Loyal customer for life." — Marcus B.</div>
         </div>
       </div>
     </div>
@@ -294,6 +229,7 @@ function AutoAfter() {
 }
 
 // ── Data ──────────────────────────────────────────────────────────────────────
+
 const EXAMPLES = [
   {
     business: "Miller's Plumbing Co.",
@@ -327,7 +263,8 @@ const MOCKUPS = [
   { before: <AutoBefore />,        after: <AutoAfter /> },
 ];
 
-// ── Card ──────────────────────────────────────────────────────────────────────
+// ── Before/After card ─────────────────────────────────────────────────────────
+
 function BeforeAfterCard({
   example,
   beforeMockup,
@@ -339,39 +276,39 @@ function BeforeAfterCard({
 }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
-      {/* Header */}
-      <div className="border-b border-stone-200 bg-stone-50 px-6 py-4">
-        <div className="flex items-center justify-between">
+      {/* Header — stacks on mobile */}
+      <div className="border-b border-stone-200 bg-stone-50 px-5 py-4 sm:px-6">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="font-semibold text-stone-900">{example.business}</h3>
             <p className="text-sm text-stone-500">{example.location} · {example.category}</p>
           </div>
-          <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700">
+          <span className="self-start rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700 sm:self-auto">
             {example.result}
           </span>
         </div>
       </div>
 
-      {/* Before / After columns */}
-      <div className="grid grid-cols-2 divide-x divide-stone-200">
-        <div className="p-5">
+      {/* Before / After — stacks on mobile, side-by-side on md+ */}
+      <div className="grid grid-cols-1 divide-y divide-stone-200 md:grid-cols-2 md:divide-y-0 md:divide-x">
+        <div className="p-5 sm:p-6">
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-red-500">Before</p>
           {beforeMockup}
           <ul className="mt-4 space-y-2.5">
             {Object.values(example.before).map((v, i) => (
               <li key={i} className="flex items-start gap-2 text-sm text-stone-600">
-                <span className="mt-0.5 text-red-400">✗</span>{v}
+                <span className="mt-0.5 flex-shrink-0 text-red-400">✗</span>{v}
               </li>
             ))}
           </ul>
         </div>
-        <div className="p-5">
+        <div className="p-5 sm:p-6">
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-emerald-600">After</p>
           {afterMockup}
           <ul className="mt-4 space-y-2.5">
             {Object.values(example.after).map((v, i) => (
               <li key={i} className="flex items-start gap-2 text-sm text-stone-800">
-                <span className="mt-0.5 text-emerald-500">✓</span>{v}
+                <span className="mt-0.5 flex-shrink-0 text-emerald-500">✓</span>{v}
               </li>
             ))}
           </ul>
@@ -382,92 +319,181 @@ function BeforeAfterCard({
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
+
 export default function PublicPage() {
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900">
 
-      {/* Nav */}
-      <header className="border-b border-stone-200 bg-white px-6 py-4">
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <span className="text-sm font-semibold text-stone-900">Clearsite</span>
-          <Link href="/login" className="text-sm text-stone-500 transition hover:text-stone-700">Admin</Link>
+      {/* Sticky nav */}
+      <header className="sticky top-0 z-20 border-b border-stone-200 bg-white/95 backdrop-blur-sm shadow-sm">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-amber-400" />
+            <span className="text-sm font-bold tracking-tight text-stone-900">Clearsite</span>
+          </div>
+          <nav className="hidden items-center gap-6 text-sm text-stone-500 sm:flex">
+            <a href="#how-it-works" className="transition-colors hover:text-stone-800">How it works</a>
+            <a href="#results" className="transition-colors hover:text-stone-800">Results</a>
+          </nav>
+          <a
+            href="mailto:you@yourdomain.com"
+            className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-amber-600"
+          >
+            Get in touch
+          </a>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="mx-auto max-w-5xl px-6 py-20 text-center">
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-1.5 text-xs text-stone-600 shadow-sm">
+      <section className="mx-auto max-w-5xl px-4 py-16 text-center sm:px-6 sm:py-24">
+        <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-1.5 text-xs text-stone-600 shadow-sm">
           <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
           Web design for local businesses
         </div>
-        <h1 className="mt-4 text-4xl font-bold leading-tight tracking-tight text-stone-900 sm:text-5xl">
-          We build websites that<br />
-          <span className="text-amber-500">actually bring in customers</span>
+        <h1 className="mt-2 text-3xl font-bold leading-tight tracking-tight text-stone-900 sm:text-4xl lg:text-5xl">
+          We build websites that<br className="hidden sm:block" />
+          {' '}<span className="text-amber-500">actually bring in customers</span>
         </h1>
-        <p className="mx-auto mt-6 max-w-xl text-lg text-stone-600">
-          Most local businesses are invisible online. We fix that — with clean, fast websites that rank on Google and turn visitors into calls.
+        <p className="mx-auto mt-5 max-w-lg text-base text-stone-600 sm:text-lg">
+          Most local businesses are invisible online. We fix that — with fast, professional websites that rank on Google and turn visitors into calls.
         </p>
-        <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-          <a href="mailto:you@yourdomain.com"
-            className="rounded-lg bg-amber-500 px-6 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-amber-600">
-            Get in touch
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <a
+            href="mailto:you@yourdomain.com"
+            className="rounded-lg bg-amber-500 px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-600"
+          >
+            Get in touch — it's free
           </a>
-          <a href="#results"
-            className="rounded-lg border border-stone-300 bg-white px-6 py-3 text-sm font-medium text-stone-700 shadow-sm transition hover:border-stone-400 hover:text-stone-900">
-            See results
+          <a
+            href="#results"
+            className="rounded-lg border border-stone-300 bg-white px-6 py-3.5 text-sm font-semibold text-stone-700 shadow-sm transition-colors hover:border-stone-400 hover:text-stone-900"
+          >
+            See real results ↓
           </a>
         </div>
+        <p className="mt-4 text-xs text-stone-400">No upfront cost for qualifying businesses · Results typically in 90 days</p>
       </section>
 
       {/* Stats */}
       <section className="border-y border-stone-200 bg-white py-10">
-        <div className="mx-auto grid max-w-5xl grid-cols-3 gap-6 px-6 text-center">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="grid grid-cols-3 gap-4 text-center">
+            {[
+              { value: '3–4×',     label: 'More inbound calls on average' },
+              { value: '90 days',  label: 'Typical time to see results'   },
+              { value: '$0',       label: 'Upfront for qualifying businesses' },
+            ].map((s) => (
+              <div key={s.label}>
+                <p className="text-xl font-bold text-stone-900 sm:text-3xl">{s.value}</p>
+                <p className="mt-1 text-[11px] leading-snug text-stone-500 sm:text-sm">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="how-it-works" className="mx-auto max-w-5xl px-4 py-16 sm:px-6 sm:py-20">
+        <div className="mb-10 text-center">
+          <h2 className="text-2xl font-bold text-stone-900 sm:text-3xl">How it works</h2>
+          <p className="mt-3 text-stone-500">Simple and fast — no technical knowledge needed on your end.</p>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {[
-            { value: '3–4×', label: 'More inbound calls on average' },
-            { value: '90 days', label: 'Typical time to see results' },
-            { value: '$0', label: 'Upfront for qualifying businesses' },
-          ].map((s) => (
-            <div key={s.label}>
-              <p className="text-2xl font-bold text-stone-900 sm:text-3xl">{s.value}</p>
-              <p className="mt-1 text-xs text-stone-500 sm:text-sm">{s.label}</p>
+            {
+              n: '1',
+              title: 'Free audit',
+              body: "We look at where your business stands online — search rankings, reviews, and website — and show you exactly what's costing you customers.",
+              icon: (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+              ),
+            },
+            {
+              n: '2',
+              title: 'We build & launch',
+              body: 'A clean, fast, mobile-friendly site goes live within 14 days. Optimized for Google from day one — no templates, no shortcuts.',
+              icon: (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+              ),
+            },
+            {
+              n: '3',
+              title: 'Customers find you',
+              body: 'Rank higher on local searches, get more calls, and stop losing business to competitors who simply have a better website.',
+              icon: (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 11a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+              ),
+            },
+          ].map((step) => (
+            <div key={step.n} className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-xs font-bold text-amber-600">
+                  {step.n}
+                </div>
+                <div className="h-px flex-1 bg-stone-200" />
+              </div>
+              <div className="mb-3 text-amber-500">{step.icon}</div>
+              <h3 className="mb-2 font-semibold text-stone-900">{step.title}</h3>
+              <p className="text-sm leading-relaxed text-stone-500">{step.body}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Before / After */}
-      <section id="results" className="mx-auto max-w-5xl px-6 py-20">
-        <div className="mb-12 text-center">
-          <h2 className="text-2xl font-bold text-stone-900 sm:text-3xl">Real results for local businesses</h2>
-          <p className="mt-3 text-stone-500">A look at what changes when a business actually shows up online.</p>
-        </div>
-        <div className="space-y-6">
-          {EXAMPLES.map((ex, i) => (
-            <BeforeAfterCard
-              key={ex.business}
-              example={ex}
-              beforeMockup={MOCKUPS[i].before}
-              afterMockup={MOCKUPS[i].after}
-            />
-          ))}
+      <section id="results" className="border-t border-stone-200 bg-white py-16 sm:py-20">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="mb-10 text-center sm:mb-12">
+            <h2 className="text-2xl font-bold text-stone-900 sm:text-3xl">Real results for real businesses</h2>
+            <p className="mt-3 text-stone-500">A look at what changes when a business actually shows up online.</p>
+          </div>
+          <div className="space-y-6">
+            {EXAMPLES.map((ex, i) => (
+              <BeforeAfterCard
+                key={ex.business}
+                example={ex}
+                beforeMockup={MOCKUPS[i].before}
+                afterMockup={MOCKUPS[i].after}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="border-t border-stone-200 bg-white px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold text-stone-900">Ready to be found?</h2>
-        <p className="mx-auto mt-3 max-w-md text-stone-600">
-          If your business isn't showing up on Google, you're leaving money on the table. Let's change that.
-        </p>
-        <a href="mailto:you@yourdomain.com"
-          className="mt-6 inline-block rounded-lg bg-amber-500 px-8 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-amber-600">
-          Start a conversation
-        </a>
+      <section className="px-4 py-16 sm:px-6 sm:py-20">
+        <div className="mx-auto max-w-2xl rounded-2xl border border-stone-200 bg-white px-6 py-12 text-center shadow-sm sm:px-12">
+          <h2 className="text-2xl font-bold text-stone-900 sm:text-3xl">Is your business easy to find on Google?</h2>
+          <p className="mx-auto mt-4 max-w-md text-stone-600">
+            If you're not sure — or you know the answer is no — let's talk. We'll audit your online presence for free and show you exactly what's holding you back.
+          </p>
+          <a
+            href="mailto:you@yourdomain.com"
+            className="mt-8 inline-flex items-center gap-2 rounded-lg bg-amber-500 px-8 py-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-600"
+          >
+            Get my free audit
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2 7h10M7 2l5 5-5 5"/>
+            </svg>
+          </a>
+          <p className="mt-3 text-xs text-stone-400">No commitment · Typically takes 15 minutes</p>
+        </div>
       </section>
 
-      <footer className="border-t border-stone-200 px-6 py-6 text-center text-xs text-stone-400">
-        © {new Date().getFullYear()} Clearsite
+      {/* Footer */}
+      <footer className="border-t border-stone-200 px-4 py-6 sm:px-6">
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-2 sm:flex-row">
+          <p className="text-xs text-stone-400">© {new Date().getFullYear()} Clearsite</p>
+          <Link href="/login" className="text-xs text-stone-300 transition-colors hover:text-stone-500">Admin</Link>
+        </div>
       </footer>
+
     </div>
   );
 }
