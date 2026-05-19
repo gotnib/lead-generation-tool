@@ -14,20 +14,22 @@ BUSINESS CONTEXT:
 
 STRICT RULES:
 
-1. RESEARCH HOOK
+1. FACTUAL ACCURACY — THIS IS THE MOST IMPORTANT RULE
+- NEVER invent, assume, or guess anything about the business or their website
+- ONLY reference website issues, design choices, or content that you can directly observe in the website_content_excerpt provided
+- If the site could not be fetched or the excerpt gives you nothing concrete to work with, write about the category/city in general terms — do NOT invent specifics about their particular site
+- If sales_notes exist, you may use those facts directly
+
+2. RESEARCH HOOK
 - Line 1 must reference something specific to this exact business: review count, rating, business name, city, or niche
 - Never open with "I hope this email finds you well" or any generic greeting
 - Never open with "My name is" or introduce yourself first
 
-2. PROBLEM IDENTIFICATION
-- Name 2-3 specific mobile or UX problems their current site likely has based on their business type
+3. PROBLEM IDENTIFICATION
+- Only name website problems you actually observed in the provided website content
+- If you have no site content, name 1-2 common problems for this business type/city without claiming you saw them on their specific site
 - Always connect the problem to a real business consequence (missed calls, lost clients, lower trust)
 - Never be insulting — frame problems as missed opportunity not failure
-
-3. PROOF
-- Reference what competitors or similar businesses in their city are doing
-- Never fabricate specific competitor names or data
-- Use phrases like "most [business type] ranking well in [city] right now" to imply market awareness
 
 4. PAYOFF
 - Describe the outcome not the service
@@ -75,25 +77,85 @@ Then write 3 subject line options following these rules:
 - Plain text, no punctuation tricks
 Output: 3 subject lines, numbered, nothing else.`;
 
-async function skimWebsite(url: string): Promise<string> {
+interface SiteData {
+  title?: string;
+  metaDescription?: string;
+  headings: string[];
+  ctaButtons: string[];
+  nav?: string;
+  bodyExcerpt: string;
+  hasPhone: boolean;
+}
+
+async function skimWebsite(url: string): Promise<SiteData | null> {
   try {
     const base = url.startsWith('http') ? url : `https://${url}`;
     const res = await fetch(base, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LeadBot/1.0)' },
-      signal: AbortSignal.timeout(6000),
+      signal: AbortSignal.timeout(8000),
     });
-    if (!res.ok) return '';
+    if (!res.ok) return null;
     const html = await res.text();
-    return html
+
+    const title = html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]?.trim();
+
+    const metaDescription =
+      html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']{5,}?)["']/i)?.[1] ??
+      html.match(/<meta[^>]+content=["']([^"']{5,}?)["'][^>]+name=["']description["']/i)?.[1];
+
+    const headings: string[] = [];
+    for (const m of html.matchAll(/<h[1-3][^>]*>([\s\S]*?)<\/h[1-3]>/gi)) {
+      const text = m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+      if (text.length > 2 && text.length < 120) headings.push(text);
+    }
+
+    const hasPhone = /(?:tel:|href="tel:)|(?:\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4})/.test(html);
+
+    const ctaButtons: string[] = [];
+    for (const m of html.matchAll(/<(?:button|a\b)[^>]*>([\s\S]*?)<\/(?:button|a)>/gi)) {
+      const text = m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+      if (text.length >= 3 && text.length <= 50 && /contact|call|book|schedule|quote|get|free|start|now|request|today/i.test(text)) {
+        ctaButtons.push(text);
+      }
+    }
+
+    const navMatch = html.match(/<nav[\s\S]*?<\/nav>/i);
+    const nav = navMatch
+      ? navMatch[0].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300)
+      : undefined;
+
+    const bodyExcerpt = html
       .replace(/<script[\s\S]*?<\/script>/gi, '')
       .replace(/<style[\s\S]*?<\/style>/gi, '')
       .replace(/<[^>]+>/g, ' ')
       .replace(/\s{2,}/g, ' ')
       .trim()
-      .slice(0, 2500);
+      .slice(0, 1200);
+
+    return {
+      title,
+      metaDescription,
+      headings: headings.slice(0, 10),
+      ctaButtons: [...new Set(ctaButtons)].slice(0, 6),
+      nav,
+      bodyExcerpt,
+      hasPhone,
+    };
   } catch {
-    return '';
+    return null;
   }
+}
+
+function formatSiteData(data: SiteData): string {
+  const lines: string[] = [];
+  if (data.title) lines.push(`Page title: ${data.title}`);
+  if (data.metaDescription) lines.push(`Meta description: ${data.metaDescription}`);
+  if (data.headings.length) lines.push(`Headings found: ${data.headings.join(' | ')}`);
+  if (data.nav) lines.push(`Navigation items: ${data.nav}`);
+  lines.push(`Has visible phone number on page: ${data.hasPhone ? 'yes' : 'no'}`);
+  if (data.ctaButtons.length) lines.push(`CTA buttons/links: ${data.ctaButtons.join(' | ')}`);
+  if (data.bodyExcerpt) lines.push(`Body text excerpt:\n${data.bodyExcerpt}`);
+  return lines.join('\n');
 }
 
 export async function POST(
@@ -107,16 +169,16 @@ export async function POST(
 
   const greeting = lead.contactName ? `Hi ${lead.contactName.split(' ')[0]},` : 'Hi,';
 
-  const websiteSnippet = lead.website ? await skimWebsite(lead.website) : '';
+  const siteData = lead.website ? await skimWebsite(lead.website) : null;
   const websiteContext = lead.website
-    ? `website_url: ${lead.website}\nwebsite_content_excerpt: ${websiteSnippet || '(could not fetch)'}`
-    : 'has_website: false';
+    ? `website_url: ${lead.website}\n${siteData ? formatSiteData(siteData) : 'website_fetch_result: could not fetch the site'}`
+    : 'has_website: false — no website on file';
 
   const notesContext = lead.notes?.trim()
-    ? `\nsales_notes: ${lead.notes.trim()}`
+    ? `\nsales_notes (use these facts directly): ${lead.notes.trim()}`
     : '';
 
-  const prompt = `Write a cold outreach email using these personalization variables:
+  const prompt = `Write a cold outreach email using ONLY the verified data below. Do not invent or assume anything not listed here.
 
 business_name: ${lead.businessName}
 business_type: ${lead.category}
@@ -125,9 +187,7 @@ review_count: ${lead.reviewCount ?? 'unknown'}
 star_rating: ${lead.rating ?? 'unknown'}
 ${websiteContext}${notesContext}
 
-Use the website content excerpt to identify specific problems or missed opportunities on their actual site (slow load indicators, no mobile menu, missing CTA, outdated design language, etc.). Reference something concrete if you can spot it.
-
-If sales_notes are present, factor them into the angle and tone of the email.
+REMINDER: Every specific claim in the email must come from the data above. If the website could not be fetched or gives no useful details, write in general category/city terms — do not invent details about their specific site.
 
 Start the email with: ${greeting}`;
 
