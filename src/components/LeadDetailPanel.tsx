@@ -129,7 +129,7 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
   useEffect(() => {
     const el = previewContainerRef.current;
     if (!el || !previewMode) return;
-    const refWidth = previewMode === 'mobile' ? 390 : 1280;
+    const refWidth = previewMode === 'mobile' ? 1179 : 1280;
     const update = () => setPreviewScale(el.offsetWidth / refWidth);
     update();
     const ro = new ResizeObserver(update);
@@ -386,10 +386,10 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
                 </div>
               </div>
             ) : (
-              /* ── Phone — iframe rendered at 390×844 then scaled down ── */
+              /* ── Phone — iframe rendered at 1179×2556 then scaled down ── */
               <div
                 className="relative overflow-hidden rounded-[2.8rem] border border-white/20 shadow-[0_24px_64px_rgba(0,0,0,0.7)]"
-                style={{ width: 'min(300px, calc(100% - 4rem))', aspectRatio: '390/844' }}
+                style={{ width: 'min(420px, calc(100% - 3rem))', aspectRatio: '1179/2556' }}
               >
                 {/* Dynamic island — sits above the iframe */}
                 <div className="absolute left-1/2 top-3 z-10 h-[14px] w-[72px] -translate-x-1/2 rounded-full bg-black" />
@@ -406,8 +406,8 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
                     key={`mobile-${normalizedWebsite}`}
                     src={`/api/proxy?url=${encodeURIComponent(normalizedWebsite)}&mode=mobile`}
                     style={{
-                      width: '390px',
-                      height: '844px',
+                      width: '1179px',
+                      height: '2556px',
                       transform: `scale(${previewScale})`,
                       transformOrigin: 'top left',
                       position: 'absolute',
