@@ -343,7 +343,20 @@ export default function LeadDetailPanel({ lead, onClose, onUpdate, onDelete }: P
                 onClick={() => { setPreviewMode('mobile'); setPreviewLoading(true); setPreviewError(false); }}
                 className={`rounded px-2.5 py-1 text-[11px] font-medium transition focus:outline-none ${previewMode === 'mobile' ? 'bg-white/15 text-white' : 'text-stone-400 hover:text-white'}`}
               >Mobile</button>
-              <button onClick={() => setPreviewMode(null)} className="ml-1 rounded p-1 text-stone-500 transition hover:text-white focus:outline-none" aria-label="Close preview">
+              <a
+                href={normalizedWebsite}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-2 rounded p-1 text-stone-500 transition hover:text-white focus:outline-none"
+                aria-label="Open site in new tab"
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V8" />
+                  <path d="M8 1h3v3" />
+                  <path d="M11 1L5.5 6.5" />
+                </svg>
+              </a>
+              <button onClick={() => setPreviewMode(null)} className="rounded p-1 text-stone-500 transition hover:text-white focus:outline-none" aria-label="Close preview">
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M2 2l8 8M10 2l-8 8" /></svg>
               </button>
             </div>
